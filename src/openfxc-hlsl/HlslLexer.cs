@@ -107,14 +107,15 @@ internal static class HlslLexer
             reader.Advance();
         }
 
+        var end = reader.Position;
         // Capture newline as trailing trivia to preserve line boundaries.
         var trailing = ReadTrivia(reader, diagnostics, treatNewLinesAsTrivia: true, stopAtTokenStart: false);
 
         return new Token
         {
             Kind = "PreprocessorDirective",
-            Text = reader.Slice(start, reader.Position),
-            Span = new Span { Start = start, End = reader.Position },
+            Text = reader.Slice(start, end),
+            Span = new Span { Start = start, End = end },
             LeadingTrivia = leading.ToArray(),
             TrailingTrivia = trailing.ToArray()
         };
@@ -133,13 +134,14 @@ internal static class HlslLexer
         var key = text.ToLowerInvariant();
         var kind = Keywords.TryGetValue(key, out var kw) ? kw : "Identifier";
 
+        var end = reader.Position;
         var trailing = ReadTrivia(reader, diagnostics, treatNewLinesAsTrivia: false);
 
         return new Token
         {
             Kind = kind,
             Text = text,
-            Span = new Span { Start = start, End = reader.Position },
+            Span = new Span { Start = start, End = end },
             LeadingTrivia = leading.ToArray(),
             TrailingTrivia = trailing.ToArray()
         };
@@ -183,13 +185,14 @@ internal static class HlslLexer
             }
         }
 
+        var end = reader.Position;
         var trailing = ReadTrivia(reader, diagnostics, treatNewLinesAsTrivia: false);
 
         return new Token
         {
             Kind = "NumericLiteral",
-            Text = reader.Slice(start, reader.Position),
-            Span = new Span { Start = start, End = reader.Position },
+            Text = reader.Slice(start, end),
+            Span = new Span { Start = start, End = end },
             LeadingTrivia = leading.ToArray(),
             TrailingTrivia = trailing.ToArray()
         };
@@ -198,22 +201,28 @@ internal static class HlslLexer
     private static Token ReadOperator(TextReader reader, List<Trivia> leading, List<Diagnostic> diagnostics)
     {
         var start = reader.Position;
+        var three = reader.PeekThree();
         var two = reader.PeekTwo();
-        var op = two switch
+        var op = three switch
         {
-            "<<" or ">>" or "&&" or "||" or "==" or "!=" or "<=" or ">=" or "+=" or "-=" or "*=" or "/=" or "%=" or "&=" or "|=" or "^=" or "<<=" or ">>=" or "::" or "++" or "--"
-                => two,
-            _ => reader.Current.ToString()
+            "<<=" or ">>=" => three,
+            _ => two switch
+            {
+                "<<" or ">>" or "&&" or "||" or "==" or "!=" or "<=" or ">=" or "+=" or "-=" or "*=" or "/=" or "%=" or "&=" or "|=" or "^=" or "::" or "++" or "--"
+                    => two,
+                _ => reader.Current.ToString()
+            }
         };
 
         reader.Advance(op.Length);
+        var end = reader.Position;
         var trailing = ReadTrivia(reader, diagnostics, treatNewLinesAsTrivia: false);
 
         return new Token
         {
             Kind = OperatorKind(op),
             Text = op,
-            Span = new Span { Start = start, End = reader.Position },
+            Span = new Span { Start = start, End = end },
             LeadingTrivia = leading.ToArray(),
             TrailingTrivia = trailing.ToArray()
         };
@@ -450,6 +459,17 @@ internal static class HlslLexer
             }
 
             var remaining = Math.Min(2, _text.Length - Position);
+            return _text.AsSpan(Position, remaining).ToString();
+        }
+
+        public string PeekThree()
+        {
+            if (IsEnd)
+            {
+                return string.Empty;
+            }
+
+            var remaining = Math.Min(3, _text.Length - Position);
             return _text.AsSpan(Position, remaining).ToString();
         }
 

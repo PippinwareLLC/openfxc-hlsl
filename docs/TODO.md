@@ -32,6 +32,6 @@
 
 ## Testing and Snapshots
 - [x] Unit and negative tests per category above (lexer and parser) — SM1 lexing covered; parser pending.
-- [ ] Era-based snapshot fixtures: SM1.x legacy, SM2/SM3 semantic-heavy, SM4/SM5 resource-heavy, FX constructs; pin deterministic JSON.
+- [x] SM1.x legacy lex snapshots (fixtures + December 2002 Glow.fx); remaining eras pending.
 - [x] CLI smoke tests for `lex`/`parse` with file/stdin IO paths (covered via C# tests).
 - [ ] CI/local test script to run unit, snapshot, negative, and CLI smoke suites quickly.
