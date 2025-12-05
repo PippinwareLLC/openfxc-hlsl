@@ -83,6 +83,20 @@ public class AdditionalLexingTests
     }
 
     [Fact]
+    public void SemanticsAndRegistersLexAsIdentifiers()
+    {
+        var text = "float4 main(float4 pos : POSITION0, float2 uv : TEXCOORD1) : COLOR0 { return pos; }\nfloat4 texVal : register(s1);";
+        var (tokens, diagnostics) = HlslLexer.Lex(text);
+
+        Assert.Empty(diagnostics);
+        Assert.Contains(tokens, t => t.Text == "POSITION0");
+        Assert.Contains(tokens, t => t.Text == "TEXCOORD1");
+        Assert.Contains(tokens, t => t.Text == "COLOR0");
+        Assert.Contains(tokens, t => t.Text == "register");
+        Assert.Contains(tokens, t => t.Text == "s1");
+    }
+
+    [Fact]
     public void GlowSampleSnapshotMatches()
     {
         var repoRoot = TestPaths.FindRepoRoot();

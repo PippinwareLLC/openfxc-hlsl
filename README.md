@@ -33,7 +33,7 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 | Shader Model / Era | Lexing | Parsing | Notes |
 | ------------------ | ------ | ------- | ----- |
 | SM1.x (legacy D3D9) | Done | Skeleton | Lexer covers legacy sampler/texture keywords, comments, numbers, operators; parsing still stub |
-| SM2.x / SM3.x | Skeleton | Skeleton | M0 stub JSON; semantics/registers/intrinsics to follow |
+| SM2.x / SM3.x | Done (lexer) | Skeleton | Lexer covers flow/storage, vector/matrix, semantics/register/register(), intrinsics; parsing still stub |
 | SM4.x | Skeleton | Skeleton | M0 stub JSON; cbuffers/resources/classes to follow |
 | SM5.x | Skeleton | Skeleton | M0 stub JSON; RW resources/advanced buffers to follow |
 | FX constructs (.fx) | Skeleton | Skeleton | M0 stub JSON; `technique`/`pass` parsing to follow |

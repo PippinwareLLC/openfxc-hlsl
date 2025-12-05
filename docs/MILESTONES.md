@@ -8,7 +8,7 @@
   - Whitespace/comment handling, legacy sampler/texture keywords, operators/punctuation, numeric literals.
   - Preprocessor tokenization with trailing text captured as trivia.
   - Positive/negative lexer tests and a representative SM1.x snapshot.
-- [ ] **M2: Lexer SM2/SM3 Coverage**
+- [x] **M2: Lexer SM2/SM3 Coverage**
   - Flow/storage keywords, vector/matrix types, semantics/register forms.
   - Intrinsic-style identifiers and sampler usage.
   - Tests for semantics/register tokens and expression-friendly tokens.
