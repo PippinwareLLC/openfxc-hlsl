@@ -36,4 +36,4 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 | SM2.x / SM3.x | Done | Skeleton | Lexer covers flow/storage, vector/matrix, semantics/register/register(), intrinsics; parsing still stub |
 | SM4.x | Done | Skeleton | Lexer covers cbuffers/tbuffers, resources, class/interface tokens; parsing still stub |
 | SM5.x | Done | Skeleton | Lexer covers RW resources, structured/byte address buffers; parsing still stub |
-| FX constructs (.fx) | Skeleton | Skeleton | M0 stub JSON; `technique`/`pass` parsing to follow |
+| FX constructs (.fx) | Done | Skeleton | Lexer covers technique/technique10/pass and Compile/Set* shader calls; parsing still stub |

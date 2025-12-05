@@ -94,4 +94,22 @@ public class LexingTests
         Assert.True(JsonNode.DeepEquals(actualNode, expectedNode), "Snapshot mismatch for sm4-snapshot.hlsl");
     }
 
+    [Fact]
+    public void FxSnapshotMatches()
+    {
+        var fixturePath = Path.Combine(RepoRoot, "samples", "dx9", "dec2002", "Samples", "Media", "EffectEdit", "Simple.fx");
+        var expectedPath = Path.Combine(RepoRoot, "tests", "snapshots", "fx-simple.lex.json");
+
+        var text = File.ReadAllText(fixturePath);
+        var expectedJson = File.ReadAllText(expectedPath);
+
+        var (tokens, diagnostics) = HlslLexer.Lex(text);
+        var result = new LexResult(FormatVersion, new SourceInfo("Simple.fx", text.Length), tokens, diagnostics);
+
+        var actualNode = JsonNode.Parse(JsonSerializer.Serialize(result, SerializerOptions))!;
+        var expectedNode = JsonNode.Parse(expectedJson)!;
+
+        Assert.True(JsonNode.DeepEquals(actualNode, expectedNode), "Snapshot mismatch for fx-simple");
+    }
+
 }

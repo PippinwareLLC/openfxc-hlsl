@@ -74,6 +74,7 @@ internal static class HlslLexer
         ["discard"] = "KeywordDiscard",
         ["technique"] = "KeywordTechnique",
         ["pass"] = "KeywordPass",
+        ["technique10"] = "KeywordTechnique10",
     };
 
     private const string DiagnosticUnknown = "HLSL0001";

@@ -121,6 +121,22 @@ public class AdditionalLexingTests
     }
 
     [Fact]
+    public void FxKeywordsLex()
+    {
+        var text = "technique technique10 pass CompileShader SetPixelShader SetVertexShader";
+        var (tokens, diagnostics) = HlslLexer.Lex(text);
+
+        Assert.Empty(diagnostics);
+        var kinds = tokens.Select(t => t.Text).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("technique", kinds);
+        Assert.Contains("technique10", kinds);
+        Assert.Contains("pass", kinds);
+        Assert.Contains("CompileShader", kinds);
+        Assert.Contains("SetPixelShader", kinds);
+        Assert.Contains("SetVertexShader", kinds);
+    }
+
+    [Fact]
     public void GlowSampleSnapshotMatches()
     {
         var repoRoot = TestPaths.FindRepoRoot();

@@ -22,9 +22,9 @@
 - [x] Tests: positive/negative coverage for resource declarations, binding syntax, class/interface shapes; snapshots for SM4 and SM5 shaders with buffers and RW resources.
 
 ## FX Framework Constructs (cross-era)
-- [ ] Lexer: `technique`, `technique10`, `pass`, directives inside FX blocks.
+- [x] Lexer: `technique`, `technique10`, `pass`, directives inside FX blocks.
 - [ ] Parser: `technique`/`pass` blocks, `CompileShader(...)`, `SetPixelShader(...)` parsed as syntax without semantics.
-- [ ] Tests: FX construct lex/parse coverage and snapshot of a representative .fx file.
+- [x] Tests: FX construct lex coverage and snapshot of a representative .fx file.
 
 ## Error Recovery (all eras)
 - [ ] Diagnostics with stable IDs for missing semicolon, missing brace, unexpected token; recovery to keep trees well-formed.
