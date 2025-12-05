@@ -97,7 +97,7 @@ public class LexingTests
     [Fact]
     public void FxSnapshotMatches()
     {
-        var fixturePath = Path.Combine(RepoRoot, "samples", "dx9", "dec2002", "Samples", "Media", "EffectEdit", "Simple.fx");
+        var fixturePath = Path.Combine(RepoRoot, "samples", "dxsdk", "dx9sdk", "Samples", "Media", "EffectEdit", "Simple.fx");
         var expectedPath = Path.Combine(RepoRoot, "tests", "snapshots", "fx-simple.lex.json");
 
         var text = File.ReadAllText(fixturePath);

@@ -143,7 +143,7 @@ public class AdditionalLexingTests
         var fixturePath = Path.Combine(repoRoot, "tests", "snapshots", "sm1-glow.lex.json");
         var expectedJson = File.ReadAllText(fixturePath);
 
-        var glowPath = Path.Combine(repoRoot, "samples", "dx9", "dec2002", "Samples", "Media", "EffectEdit", "Glow.fx");
+        var glowPath = Path.Combine(repoRoot, "samples", "dxsdk", "dx9sdk", "Samples", "Media", "EffectEdit", "Glow.fx");
         var glowText = File.ReadAllText(glowPath);
 
         var (tokens, diagnostics) = HlslLexer.Lex(glowText);
