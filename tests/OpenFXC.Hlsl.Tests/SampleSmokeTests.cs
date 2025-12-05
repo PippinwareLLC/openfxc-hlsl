@@ -25,7 +25,7 @@ public class SampleSmokeTests
 
         var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
         Assert.NotEmpty(tokens);
-        Assert.NotNull(lexDiagnostics);
+        Assert.Empty(lexDiagnostics);
 
         var (root, parseDiagnostics) = Parser.Parse(tokens, text.Length);
         Assert.Equal("CompilationUnit", root.Kind);

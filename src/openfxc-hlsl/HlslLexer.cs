@@ -79,6 +79,7 @@ internal static class HlslLexer
 
     private const string DiagnosticUnknown = "HLSL0001";
     private const string DiagnosticUnterminatedComment = "HLSL0002";
+    private const string DiagnosticUnterminatedString = "HLSL0003";
 
     internal static (Token[] Tokens, Diagnostic[] Diagnostics) Lex(string text)
     {
@@ -112,6 +113,10 @@ internal static class HlslLexer
             {
                 tokens.Add(ReadNumber(reader, leading, diagnostics));
             }
+            else if (c == '"')
+            {
+                tokens.Add(ReadStringLiteral(reader, leading, diagnostics));
+            }
             else if (IsOperatorStart(c))
             {
                 tokens.Add(ReadOperator(reader, leading, diagnostics));
@@ -130,6 +135,52 @@ internal static class HlslLexer
         }
 
         return (tokens.ToArray(), diagnostics.ToArray());
+    }
+
+    private static Token ReadStringLiteral(TextReader reader, List<Trivia> leading, List<Diagnostic> diagnostics)
+    {
+        var start = reader.Position;
+        reader.Advance(); // opening quote
+        var terminated = false;
+        while (!reader.IsEnd)
+        {
+            var c = reader.Current;
+            if (c == '\\')
+            {
+                // skip escaped character
+                reader.Advance(2);
+                continue;
+            }
+            if (c == '"')
+            {
+                reader.Advance(); // closing quote
+                terminated = true;
+                break;
+            }
+            // Allow newlines; stop if EOF
+            reader.Advance();
+        }
+
+        if (!terminated)
+        {
+            diagnostics.Add(new Diagnostic
+            {
+                Id = DiagnosticUnterminatedString,
+                Message = "Unterminated string literal.",
+                Span = new Span { Start = start, End = reader.Position }
+            });
+        }
+
+        var end = reader.Position;
+        var trailing = ReadTrivia(reader, diagnostics, treatNewLinesAsTrivia: false);
+        return new Token
+        {
+            Kind = "StringLiteral",
+            Text = reader.Slice(start, end),
+            Span = new Span { Start = start, End = end },
+            LeadingTrivia = leading.ToArray(),
+            TrailingTrivia = trailing.ToArray()
+        };
     }
 
     private static Token ReadPreprocessor(TextReader reader, List<Trivia> leading, List<Diagnostic> diagnostics)

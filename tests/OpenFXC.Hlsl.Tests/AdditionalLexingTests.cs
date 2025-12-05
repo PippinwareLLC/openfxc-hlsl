@@ -137,6 +137,16 @@ public class AdditionalLexingTests
     }
 
     [Fact]
+    public void StringLiteralLexesAndUnterminatedProducesDiagnostic()
+    {
+        var text = "string name = \"hello\"; \"unterminated";
+        var (tokens, diagnostics) = HlslLexer.Lex(text);
+
+        Assert.Contains(tokens, t => t.Kind == "StringLiteral" && t.Text == "\"hello\"");
+        Assert.Contains(diagnostics, d => d.Id == "HLSL0003");
+    }
+
+    [Fact]
     public void GlowSampleSnapshotMatches()
     {
         var repoRoot = TestPaths.FindRepoRoot();

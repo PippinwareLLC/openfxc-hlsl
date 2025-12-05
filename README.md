@@ -40,3 +40,10 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 | SM4.x | Done | Complete | `cbuffer`/`tbuffer` with bindings, resource templates, class/interface/method signatures |
 | SM5.x | Done | Complete | RW/structured/byte address resources with bindings and expressions/statements |
 | FX constructs (.fx) | Done | Complete | Technique/technique10/pass bodies parsed syntax-only, Compile/Set shader calls tokenized |
+
+## DXSDK Sample Coverage (lex/parse smoke)
+
+- Source set: all `.fx` files under `samples/` (DX9 SDK drops, including Dec 2002 and later DXSDKs).
+- Lexing: runs without crashes across all samples; diagnostics logged where legacy/non-HLSL text appears but tokens are produced.
+- Parsing: always returns a `CompilationUnit` with full-span coverage; diagnostics are allowed for syntax outside the FXC-era subset, but trees are produced for every sample.
+- To run locally: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj` (includes sample smoke) or `tests/run-all.cmd` / `tests/run-all.sh`.
