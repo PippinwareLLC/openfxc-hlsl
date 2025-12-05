@@ -47,3 +47,4 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 - Lexing: runs without crashes across all samples; diagnostics logged where legacy/non-HLSL text appears but tokens are produced.
 - Parsing: always returns a `CompilationUnit` with full-span coverage; diagnostics are allowed for syntax outside the FXC-era subset, but trees are produced for every sample.
 - To run locally: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj` (includes sample smoke) or `tests/run-all.cmd` / `tests/run-all.sh`.
+- Samples attribution: the DX9/DXSDK `.fx` files are sourced from Microsoft DirectX SDK drops (e.g., Dec 2002, DXSDK_Feb10) and remain © Microsoft; included here solely for testing/compatibility purposes.
