@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using OpenFXC.Hlsl;
+using System.Linq;
 
 internal sealed class Program
 {
@@ -123,22 +124,17 @@ internal sealed class Program
         return JsonSerializer.Serialize(value, options);
     }
 
-    private static ParseResult BuildParseResult(string fileName, int length, Token[] tokens, Diagnostic[] diagnostics)
+    private static ParseResult BuildParseResult(string fileName, int length, Token[] tokens, Diagnostic[] lexDiagnostics)
     {
-        var root = new AstNode
-        {
-            Id = 1,
-            Kind = "CompilationUnit",
-            Span = new Span { Start = 0, End = length },
-            Children = Array.Empty<AstChild>()
-        };
+        var (root, parseDiagnostics) = Parser.Parse(tokens, length);
+        var allDiagnostics = lexDiagnostics.Concat(parseDiagnostics).ToArray();
 
         return new ParseResult(
             FormatVersion,
             new SourceInfo(fileName, length),
             root,
             tokens,
-            diagnostics);
+            allDiagnostics);
     }
 
     private record CliOptions(string? InputPath, string? OutputPath);

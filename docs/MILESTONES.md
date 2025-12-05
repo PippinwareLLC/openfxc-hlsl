@@ -15,7 +15,7 @@
 - [x] **M3: Lexer SM4/SM5 Coverage**
   - Resource keywords (`cbuffer`, `tbuffer`, `Texture*`, `StructuredBuffer`, `RW*`, `ByteAddressBuffer`) and class/interface tokens.
   - Tests for template-like resource forms and binding tokens.
-- [ ] **M4: Parser Baseline (All Eras)**
+- [x] **M4: Parser Baseline (All Eras)**
   - Always emit `CompilationUnit`; establish node/span invariants.
   - Expressions (precedence, swizzles, indexing, calls), statements (if/else, loops, discard), declarations (scalars/vectors/matrices/arrays/structs/typedefs).
   - Recovery for missing semicolons/braces and unexpected tokens with diagnostics.

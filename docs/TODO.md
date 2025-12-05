@@ -27,7 +27,7 @@
 - [x] Tests: FX construct lex coverage and snapshot of a representative .fx file.
 
 ## Error Recovery (all eras)
-- [ ] Diagnostics with stable IDs for missing semicolon, missing brace, unexpected token; recovery to keep trees well-formed.
+- [x] Diagnostics with stable IDs for missing semicolon, unexpected token; recovery keeps `CompilationUnit` well-formed (missing brace still pending).
 - [ ] Tests: targeted negative cases in each era to verify recovery continues producing a `CompilationUnit` with children.
 
 ## Testing and Snapshots
