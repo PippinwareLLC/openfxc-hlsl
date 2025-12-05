@@ -9,12 +9,12 @@ This project was created by peeling off the commits from Pippinware LLCs' in-pro
 - Emit stable JSON for tokens/AST with accurate spans and diagnostics for tooling and downstream compilers.
 - Stay reusable: clean CLI (`lex`/`parse`) and library surfaces without semantics, IR, or bytecode concerns.
 
-## Usage (M0 skeleton)
+## Usage
 1. Build: `dotnet build src/openfxc-hlsl/openfxc-hlsl.csproj`
 2. Lex: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe lex -i path/to/file.hlsl`
 3. Parse: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe parse -i path/to/file.hlsl`
 
-Current output (M1) includes a basic lexer for SM1.x-era syntax; parse still emits a `CompilationUnit` root with spans sized to the input and shares the lexed tokens/diagnostics. Schema matches `docs/TDD.md`.
+Current output includes full lexing for SM1–SM5 and FX constructs; parsing produces a `CompilationUnit` AST with spans/diagnostics and baseline statements/expressions/decls (syntax-only, no semantics). Schema matches `docs/TDD.md`.
 
 ## Testing
 - Run all tests: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj`
@@ -32,8 +32,8 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 
 | Shader Model / Era | Lexing | Parsing | Notes |
 | ------------------ | ------ | ------- | ----- |
-| SM1.x (legacy D3D9) | Done | Skeleton | Lexer covers legacy sampler/texture keywords, comments, numbers, operators; parsing still stub |
-| SM2.x / SM3.x | Done | Skeleton | Lexer covers flow/storage, vector/matrix, semantics/register/register(), intrinsics; parsing still stub |
-| SM4.x | Done | Skeleton | Lexer covers cbuffers/tbuffers, resources, class/interface tokens; parsing still stub |
-| SM5.x | Done | Skeleton | Lexer covers RW resources, structured/byte address buffers; parsing still stub |
-| FX constructs (.fx) | Done | Skeleton | Lexer covers technique/technique10/pass and Compile/Set* shader calls; parsing still stub |
+| SM1.x (legacy D3D9) | Done | Baseline | Lexer covers legacy sampler/texture keywords, comments, numbers, operators; parser handles basic decls/blocks/flow |
+| SM2.x / SM3.x | Done | Baseline | Lexer covers flow/storage, vector/matrix, semantics/register/register(), intrinsics; parser handles basic decls/blocks/flow |
+| SM4.x | Done | Baseline | Lexer covers cbuffers/tbuffers, resources, class/interface tokens; parser handles basic decls/blocks/flow |
+| SM5.x | Done | Baseline | Lexer covers RW resources, structured/byte address buffers; parser handles basic decls/blocks/flow |
+| FX constructs (.fx) | Done | Baseline | Lexer covers technique/technique10/pass and Compile/Set* shader calls; parser handles basic decls/blocks/flow |

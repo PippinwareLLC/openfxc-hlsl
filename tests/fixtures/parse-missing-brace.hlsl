@@ -1,0 +1,3 @@
+float4 main() : COLOR0
+{
+    return 1;

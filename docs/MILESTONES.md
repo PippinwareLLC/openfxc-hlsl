@@ -17,7 +17,7 @@
   - Tests for template-like resource forms and binding tokens.
 - [x] **M4: Parser Baseline (All Eras)**
   - Always emit `CompilationUnit`; establish node/span invariants.
-  - Expressions (precedence, swizzles, indexing, calls), statements (if/else, loops, discard), declarations (scalars/vectors/matrices/arrays/structs/typedefs).
+  - Expressions (precedence, calls, indexing, member access), statements (if/else, loops, discard), declarations (scalars/vectors/matrices/arrays/structs/typedefs).
   - Recovery for missing semicolons/braces and unexpected tokens with diagnostics.
 - [ ] **M5: Era-Specific Parsing**
   - SM1.x: sampler declarations and `sampler_state` blocks parsed as syntax.

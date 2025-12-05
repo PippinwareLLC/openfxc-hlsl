@@ -149,6 +149,7 @@ internal sealed class Parser
         // Optional initializer: = expression
         if (Match("Equals"))
         {
+            Consume(); // =
             var expr = ParseExpression();
             if (expr is not null)
             {
@@ -215,6 +216,11 @@ internal sealed class Parser
         if (Current!.Kind == "KeywordReturn")
         {
             return ParseReturnStatement();
+        }
+
+        if (Current!.Kind == "OpenBrace")
+        {
+            return ParseBlock();
         }
 
         if (Current!.Kind == "KeywordIf")
@@ -509,7 +515,101 @@ internal sealed class Parser
             };
         }
 
-        return ParsePrimary();
+        return ParsePostfix();
+    }
+
+    private AstNode? ParsePostfix()
+    {
+        var primary = ParsePrimary();
+        if (primary is null) return null;
+
+        while (!IsEnd)
+        {
+            if (Match("Dot"))
+            {
+                var dot = Consume();
+                var ident = Match("Identifier") ? Consume() : null;
+                if (ident is null)
+                {
+                    AddDiagnostic("HLSL1003", "Expected identifier after '.'.", CurrentSpan());
+                    break;
+                }
+
+                primary = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "MemberAccessExpression",
+                    Span = new Span { Start = primary.Span.Start, End = ident.Span.End },
+                    Children = new[]
+                    {
+                        new AstChild { Role = "expression", Node = primary },
+                        new AstChild { Role = "member", Node = Leaf("Identifier", ident) }
+                    }
+                };
+                continue;
+            }
+
+            if (Match("OpenParen"))
+            {
+                var args = new List<AstChild>();
+                Consume(); // (
+                while (!IsEnd && !Match("CloseParen"))
+                {
+                    var argExpr = ParseExpression();
+                    if (argExpr is not null)
+                    {
+                        args.Add(new AstChild { Role = "argument", Node = argExpr });
+                    }
+                    if (Match("Comma"))
+                    {
+                        Consume();
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                ConsumeExpected("CloseParen");
+
+                primary = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "CallExpression",
+                    Span = new Span { Start = primary.Span.Start, End = CurrentSpan().End },
+                    Children = new[] { new AstChild { Role = "callee", Node = primary } }.Concat(args).ToArray()
+                };
+                continue;
+            }
+
+            if (Match("OpenBracket"))
+            {
+                Consume(); // [
+                var indexExpr = ParseExpression();
+                ConsumeExpected("CloseBracket");
+                if (indexExpr is null)
+                {
+                    break;
+                }
+
+                primary = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "IndexExpression",
+                    Span = new Span { Start = primary.Span.Start, End = indexExpr.Span.End },
+                    Children = new[]
+                    {
+                        new AstChild { Role = "expression", Node = primary },
+                        new AstChild { Role = "index", Node = indexExpr }
+                    }
+                };
+                continue;
+            }
+
+            break;
+        }
+
+        return primary;
     }
 
     private AstNode? ParsePrimary()

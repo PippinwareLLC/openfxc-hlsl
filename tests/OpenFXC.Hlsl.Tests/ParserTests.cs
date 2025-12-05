@@ -35,4 +35,29 @@ public class ParserTests
         Assert.NotEmpty(parseDiagnostics);
         Assert.Contains(parseDiagnostics, d => d.Id == "HLSL1002");
     }
+
+    [Fact]
+    public void ParseMissingBraceProducesDiagnostic()
+    {
+        var path = Path.Combine(RepoRoot, "tests", "fixtures", "parse-missing-brace.hlsl");
+        var text = File.ReadAllText(path);
+        var (tokens, _) = HlslLexer.Lex(text);
+        var (_, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+
+        Assert.Contains(parseDiagnostics, d => d.Id == "HLSL1004");
+    }
+
+    [Fact]
+    public void ParseStatementsAndExpressions()
+    {
+        var path = Path.Combine(RepoRoot, "tests", "fixtures", "parse-statements.hlsl");
+        var text = File.ReadAllText(path);
+        var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
+        var (root, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+
+        Assert.Empty(lexDiagnostics);
+        Assert.Empty(parseDiagnostics);
+        Assert.Equal("CompilationUnit", root.Kind);
+        Assert.True(root.Children.Length > 0);
+    }
 }

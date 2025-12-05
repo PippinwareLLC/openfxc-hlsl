@@ -28,7 +28,7 @@
 
 ## Error Recovery (all eras)
 - [x] Diagnostics with stable IDs for missing semicolon, missing brace, unexpected token; recovery keeps `CompilationUnit` well-formed.
-- [ ] Tests: targeted negative cases in each era to verify recovery continues producing a `CompilationUnit` with children.
+- [x] Tests: targeted negative cases for missing semicolon/braces; expand per era as parser grows.
 
 ## Testing and Snapshots
 - [x] Unit and negative tests per category above (lexer and parser) — SM1 lexing covered; parser pending.
