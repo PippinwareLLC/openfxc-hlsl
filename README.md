@@ -1,6 +1,9 @@
 # openfxc-hlsl
 The open HLSL lexer / parser for SM1 - SM5 (syntax-only front-end).
 
+# Origin
+This project was created by peeling off the commits from Pippinware LLCs' in-progress OpenFXC private project
+
 ## Aim of the Project
 - Provide a deterministic, syntax-only HLSL front-end matching FXC-era SM1-SM5 acceptance.
 - Emit stable JSON for tokens/AST with accurate spans and diagnostics for tooling and downstream compilers.
@@ -11,7 +14,7 @@ The open HLSL lexer / parser for SM1 - SM5 (syntax-only front-end).
 2. Lex: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe lex -i path/to/file.hlsl`
 3. Parse: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe parse -i path/to/file.hlsl`
 
-Current M0 output is a stub: empty token lists and a `CompilationUnit` root with spans sized to the input; schema matches `docs/TDD.md`.
+Current output (M1) includes a basic lexer for SM1.x-era syntax; parse still emits a `CompilationUnit` root with spans sized to the input and shares the lexed tokens/diagnostics. Schema matches `docs/TDD.md`.
 
 ## Docs
 - Behavioral contract: `docs/TDD.md`
@@ -23,7 +26,7 @@ Current M0 output is a stub: empty token lists and a `CompilationUnit` root with
 
 | Shader Model / Era | Lexing | Parsing | Notes |
 | ------------------ | ------ | ------- | ----- |
-| SM1.x (legacy D3D9) | Skeleton | Skeleton | M0 stub JSON; sampler/texture semantics to follow |
+| SM1.x (legacy D3D9) | In progress | Skeleton | Lexer covers legacy sampler/texture keywords, comments, numbers, operators; parsing still stub |
 | SM2.x / SM3.x | Skeleton | Skeleton | M0 stub JSON; semantics/registers/intrinsics to follow |
 | SM4.x | Skeleton | Skeleton | M0 stub JSON; cbuffers/resources/classes to follow |
 | SM5.x | Skeleton | Skeleton | M0 stub JSON; RW resources/advanced buffers to follow |

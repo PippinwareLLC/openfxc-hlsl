@@ -4,7 +4,7 @@
   - CLI skeleton for `openfxc-hlsl lex` / `parse` with stdin/file IO and JSON output per `docs/TDD.md`.
   - Deterministic spans, trivia retention, and stable diagnostic IDs/messages.
   - Basic smoke tests and CI wiring.
-- [ ] **M1: Lexer SM1.x Coverage**
+- [x] **M1: Lexer SM1.x Coverage**
   - Whitespace/comment handling, legacy sampler/texture keywords, operators/punctuation, numeric literals.
   - Preprocessor tokenization with trailing text captured as trivia.
   - Positive/negative lexer tests and a representative SM1.x snapshot.

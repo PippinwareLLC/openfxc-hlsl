@@ -7,7 +7,7 @@
 - [ ] Preserve trivia (whitespace/newlines/comments) and preprocessor lines as specified; ensure operator/punctuation coverage across eras.
 
 ## Shader Model 1.x (legacy D3D9 era)
-- [ ] Lexer: legacy sampler/texture keywords (`sampler`, `sampler1D/2D/3D/CUBE`, `texture`), basic numeric literals, directives.
+- [x] Lexer: legacy sampler/texture keywords (`sampler`, `sampler1D/2D/3D/CUBE`, `texture`), basic numeric literals, directives.
 - [ ] Parser: sampler declarations, sampler_state blocks (`sampler_state { MinFilter = Linear; }`), fixed-function style constructs as syntax.
 - [ ] Tests: positive/negative lex cases for comments/whitespace/legacy keywords; parser cases for sampler blocks, legacy registers/semantics; snapshot of a representative SM1.x shader.
 

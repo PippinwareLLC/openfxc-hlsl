@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using OpenFXC.Hlsl;
 
 internal sealed class Program
 {
@@ -21,11 +22,12 @@ internal sealed class Program
             var input = ReadInput(options.InputPath);
             var fileName = options.InputPath is null ? "stdin" : Path.GetFileName(options.InputPath);
             var length = input.Length;
+            var (tokens, diagnostics) = HlslLexer.Lex(input);
 
             string json = command switch
             {
-                "lex" => Serialize(BuildLexResult(fileName, length)),
-                "parse" => Serialize(BuildParseResult(fileName, length)),
+                "lex" => Serialize(new LexResult(FormatVersion, new SourceInfo(fileName, length), tokens, diagnostics)),
+                "parse" => Serialize(BuildParseResult(fileName, length, tokens, diagnostics)),
                 _ => throw new InvalidOperationException($"Unknown command '{command}'. Expected 'lex' or 'parse'.")
             };
 
@@ -121,10 +123,7 @@ internal sealed class Program
         return JsonSerializer.Serialize(value, options);
     }
 
-    private static LexResult BuildLexResult(string fileName, int length) =>
-        new(FormatVersion, new SourceInfo(fileName, length), Array.Empty<Token>(), Array.Empty<Diagnostic>());
-
-    private static ParseResult BuildParseResult(string fileName, int length)
+    private static ParseResult BuildParseResult(string fileName, int length, Token[] tokens, Diagnostic[] diagnostics)
     {
         var root = new AstNode
         {
@@ -138,60 +137,9 @@ internal sealed class Program
             FormatVersion,
             new SourceInfo(fileName, length),
             root,
-            Array.Empty<Token>(),
-            Array.Empty<Diagnostic>());
+            tokens,
+            diagnostics);
     }
 
     private record CliOptions(string? InputPath, string? OutputPath);
-
-    private sealed record SourceInfo(string FileName, int Length);
-
-    private sealed record Span
-    {
-        public int Start { get; init; }
-        public int End { get; init; }
-    }
-
-    private sealed record Token
-    {
-        public string Kind { get; init; } = string.Empty;
-        public string Text { get; init; } = string.Empty;
-        public Span Span { get; init; } = new();
-        public object[] LeadingTrivia { get; init; } = Array.Empty<object>();
-        public object[] TrailingTrivia { get; init; } = Array.Empty<object>();
-    }
-
-    private sealed record Diagnostic
-    {
-        public string Id { get; init; } = string.Empty;
-        public string Message { get; init; } = string.Empty;
-        public Span Span { get; init; } = new();
-    }
-
-    private sealed record LexResult(
-        int FormatVersion,
-        SourceInfo Source,
-        Token[] Tokens,
-        Diagnostic[] Diagnostics);
-
-    private sealed record AstChild
-    {
-        public string Role { get; init; } = string.Empty;
-        public AstNode Node { get; init; } = new();
-    }
-
-    private sealed record AstNode
-    {
-        public int Id { get; init; }
-        public string Kind { get; init; } = string.Empty;
-        public Span Span { get; init; } = new();
-        public AstChild[] Children { get; init; } = Array.Empty<AstChild>();
-    }
-
-    private sealed record ParseResult(
-        int FormatVersion,
-        SourceInfo Source,
-        AstNode Root,
-        Token[] Tokens,
-        Diagnostic[] Diagnostics);
 }
