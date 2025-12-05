@@ -61,7 +61,7 @@ internal sealed class Parser
         }
 
         // Heuristic: type identifier ... if followed by "(" treat as function, else variable.
-        if (IsTypeLike(startToken) && Peek(1) is { Kind: "Identifier" } id)
+        if (IsTypeLike(startToken) && Peek(1) is { Kind: "Identifier" })
         {
             if (Peek(2) is { Kind: "OpenParen" })
             {
@@ -187,14 +187,23 @@ internal sealed class Parser
             }
         }
 
-        var endTok = ConsumeExpected("CloseBrace");
-        var end = endTok.Span.End;
+        Span endSpan;
+        if (Match("CloseBrace"))
+        {
+            var endTok = Consume();
+            endSpan = endTok.Span;
+        }
+        else
+        {
+            AddDiagnostic("HLSL1004", "Expected '}' to close block.", CurrentSpan());
+            endSpan = new Span { Start = start, End = start };
+        }
 
         return new AstNode
         {
             Id = NextId(),
             Kind = "Block",
-            Span = new Span { Start = start, End = end },
+            Span = new Span { Start = start, End = endSpan.End },
             Children = statements.ToArray()
         };
     }
@@ -208,6 +217,53 @@ internal sealed class Parser
             return ParseReturnStatement();
         }
 
+        if (Current!.Kind == "KeywordIf")
+        {
+            return ParseIfStatement();
+        }
+
+        if (Current!.Kind == "KeywordWhile")
+        {
+            return ParseWhileStatement();
+        }
+
+        if (Current!.Kind == "KeywordDo")
+        {
+            return ParseDoWhileStatement();
+        }
+
+        if (Current!.Kind == "KeywordFor")
+        {
+            return ParseForStatement();
+        }
+
+        if (Current!.Kind == "KeywordBreak" || Current!.Kind == "KeywordContinue")
+        {
+            var kind = Current!.Kind == "KeywordBreak" ? "BreakStatement" : "ContinueStatement";
+            var start = Consume().Span.Start;
+            ConsumeExpected("Semicolon");
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = kind,
+                Span = new Span { Start = start, End = CurrentSpan().End },
+                Children = Array.Empty<AstChild>()
+            };
+        }
+
+        if (Current!.Kind == "KeywordDiscard")
+        {
+            var start = Consume().Span.Start;
+            ConsumeExpected("Semicolon");
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = "DiscardStatement",
+                Span = new Span { Start = start, End = CurrentSpan().End },
+                Children = Array.Empty<AstChild>()
+            };
+        }
+
         // Local variable declaration heuristic inside blocks: type Identifier ...
         if (IsTypeLike(Current!) && Peek(1) is { Kind: "Identifier" } && Peek(2)?.Kind != "OpenParen")
         {
@@ -215,6 +271,138 @@ internal sealed class Parser
         }
 
         return ParseExpressionStatement();
+    }
+
+    private AstNode ParseIfStatement()
+    {
+        var start = Consume().Span.Start; // if
+        ConsumeExpected("OpenParen");
+        var condition = ParseExpression();
+        ConsumeExpected("CloseParen");
+        var thenStmt = ParseStatement() ?? new AstNode { Id = NextId(), Kind = "EmptyStatement", Span = CurrentSpan(), Children = Array.Empty<AstChild>() };
+        AstNode? elseStmt = null;
+        if (Match("KeywordElse"))
+        {
+            Consume();
+            elseStmt = ParseStatement();
+        }
+
+        var end = elseStmt?.Span.End ?? thenStmt.Span.End;
+        var children = new List<AstChild>
+        {
+            new AstChild { Role = "condition", Node = condition ?? Leaf("Missing", new Token { Span = CurrentSpan() }) },
+            new AstChild { Role = "then", Node = thenStmt }
+        };
+        if (elseStmt is not null)
+        {
+            children.Add(new AstChild { Role = "else", Node = elseStmt });
+        }
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "IfStatement",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
+    private AstNode ParseWhileStatement()
+    {
+        var start = Consume().Span.Start; // while
+        ConsumeExpected("OpenParen");
+        var condition = ParseExpression();
+        ConsumeExpected("CloseParen");
+        var body = ParseStatement() ?? new AstNode { Id = NextId(), Kind = "EmptyStatement", Span = CurrentSpan(), Children = Array.Empty<AstChild>() };
+        var end = body.Span.End;
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "WhileStatement",
+            Span = new Span { Start = start, End = end },
+            Children = new[]
+            {
+                new AstChild { Role = "condition", Node = condition ?? Leaf("Missing", new Token { Span = CurrentSpan() }) },
+                new AstChild { Role = "body", Node = body }
+            }
+        };
+    }
+
+    private AstNode ParseDoWhileStatement()
+    {
+        var start = Consume().Span.Start; // do
+        var body = ParseStatement() ?? new AstNode { Id = NextId(), Kind = "EmptyStatement", Span = CurrentSpan(), Children = Array.Empty<AstChild>() };
+        ConsumeExpected("KeywordWhile");
+        ConsumeExpected("OpenParen");
+        var condition = ParseExpression();
+        ConsumeExpected("CloseParen");
+        ConsumeExpected("Semicolon");
+        var end = CurrentSpan().End;
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "DoWhileStatement",
+            Span = new Span { Start = start, End = end },
+            Children = new[]
+            {
+                new AstChild { Role = "body", Node = body },
+                new AstChild { Role = "condition", Node = condition ?? Leaf("Missing", new Token { Span = CurrentSpan() }) }
+            }
+        };
+    }
+
+    private AstNode ParseForStatement()
+    {
+        var start = Consume().Span.Start; // for
+        ConsumeExpected("OpenParen");
+
+        AstNode? init = null;
+        if (!Match("Semicolon"))
+        {
+            if (IsTypeLike(Current!) && Peek(1) is { Kind: "Identifier" } && Peek(2)?.Kind != "OpenParen")
+            {
+                init = ParseVariableDeclaration();
+            }
+            else
+            {
+                init = ParseExpressionStatement();
+            }
+        }
+        else
+        {
+            Consume(); // ;
+        }
+
+        AstNode? condition = null;
+        if (!Match("Semicolon"))
+        {
+            condition = ParseExpression();
+        }
+        ConsumeExpected("Semicolon");
+
+        AstNode? increment = null;
+        if (!Match("CloseParen"))
+        {
+            increment = ParseExpression();
+        }
+        ConsumeExpected("CloseParen");
+
+        var body = ParseStatement() ?? new AstNode { Id = NextId(), Kind = "EmptyStatement", Span = CurrentSpan(), Children = Array.Empty<AstChild>() };
+
+        var end = body.Span.End;
+        var children = new List<AstChild>();
+        if (init is not null) children.Add(new AstChild { Role = "initializer", Node = init });
+        if (condition is not null) children.Add(new AstChild { Role = "condition", Node = condition });
+        if (increment is not null) children.Add(new AstChild { Role = "increment", Node = increment });
+        children.Add(new AstChild { Role = "body", Node = body });
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "ForStatement",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
+        };
     }
 
     private AstNode ParseReturnStatement()
@@ -253,18 +441,24 @@ internal sealed class Parser
         };
     }
 
-    private AstNode? ParseExpression()
+    private AstNode? ParseExpression(int precedence = 0)
     {
-        var left = ParsePrimary();
+        var left = ParseUnary();
         if (left is null)
         {
             return null;
         }
 
-        while (!IsEnd && IsBinaryOperator(Current!))
+        while (true)
         {
-            var op = Consume();
-            var right = ParsePrimary();
+            var op = Current;
+            if (op is null) break;
+            var opPrec = GetPrecedence(op.Kind);
+            if (opPrec < precedence) break;
+
+            var associativity = op.Kind == "Equals" ? Precedence.Right : Precedence.Left;
+            Consume();
+            var right = ParseExpression(opPrec + (associativity == Precedence.Left ? 1 : 0));
             if (right is null)
             {
                 AddDiagnostic("HLSL1003", $"Expected expression after '{op.Text}'.", CurrentSpan());
@@ -286,6 +480,36 @@ internal sealed class Parser
         }
 
         return left;
+    }
+
+    private AstNode? ParseUnary()
+    {
+        if (IsEnd) return null;
+        var tok = Current!;
+        if (tok.Kind is "Plus" or "Minus" or "Bang" or "Tilde")
+        {
+            Consume();
+            var operand = ParseUnary();
+            if (operand is null)
+            {
+                AddDiagnostic("HLSL1003", $"Expected expression after '{tok.Text}'.", CurrentSpan());
+                return null;
+            }
+
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = "UnaryExpression",
+                Span = new Span { Start = tok.Span.Start, End = operand.Span.End },
+                Children = new[]
+                {
+                    new AstChild { Role = "operator", Node = Leaf("Operator", tok) },
+                    new AstChild { Role = "operand", Node = operand }
+                }
+            };
+        }
+
+        return ParsePrimary();
     }
 
     private AstNode? ParsePrimary()
@@ -312,6 +536,28 @@ internal sealed class Parser
                 return null;
         }
     }
+
+    private enum Precedence
+    {
+        Left,
+        Right
+    }
+
+    private static int GetPrecedence(string kind) => kind switch
+    {
+        "Equals" => 1,
+        "PipePipe" => 2,
+        "AmpersandAmpersand" => 3,
+        "Pipe" => 4,
+        "Caret" => 5,
+        "Ampersand" => 6,
+        "EqualsEquals" or "BangEquals" => 7,
+        "Less" or "LessEquals" or "Greater" or "GreaterEquals" => 8,
+        "LessLess" or "GreaterGreater" => 9,
+        "Plus" or "Minus" => 10,
+        "Star" or "Slash" or "Percent" => 11,
+        _ => -1
+    };
 
     private bool IsTypeLike(Token token) =>
         token.Kind.StartsWith("Keyword", StringComparison.Ordinal) || token.Kind == "Identifier";
