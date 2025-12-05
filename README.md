@@ -16,6 +16,9 @@ This project was created by peeling off the commits from Pippinware LLCs' in-pro
 
 Current output (M1) includes a basic lexer for SM1.x-era syntax; parse still emits a `CompilationUnit` root with spans sized to the input and shares the lexed tokens/diagnostics. Schema matches `docs/TDD.md`.
 
+## Testing
+- Run all tests: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj`
+
 ## Docs
 - Behavioral contract: `docs/TDD.md`
 - Work queue: `docs/TODO.md`

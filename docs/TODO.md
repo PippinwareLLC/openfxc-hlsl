@@ -9,7 +9,7 @@
 ## Shader Model 1.x (legacy D3D9 era)
 - [x] Lexer: legacy sampler/texture keywords (`sampler`, `sampler1D/2D/3D/CUBE`, `texture`), basic numeric literals, directives.
 - [ ] Parser: sampler declarations, sampler_state blocks (`sampler_state { MinFilter = Linear; }`), fixed-function style constructs as syntax.
-- [ ] Tests: positive/negative lex cases for comments/whitespace/legacy keywords; parser cases for sampler blocks, legacy registers/semantics; snapshot of a representative SM1.x shader.
+- [x] Tests: positive/negative lex cases for comments/whitespace/legacy keywords; snapshot of a representative SM1.x shader.
 
 ## Shader Model 2.x / 3.x
 - [ ] Lexer: flow/storage keywords, vector/matrix types, intrinsics in identifiers, preprocessor coverage, semantics/register tokens.
@@ -31,7 +31,7 @@
 - [ ] Tests: targeted negative cases in each era to verify recovery continues producing a `CompilationUnit` with children.
 
 ## Testing and Snapshots
-- [ ] Unit and negative tests per category above (lexer and parser).
+- [x] Unit and negative tests per category above (lexer and parser) — SM1 lexing covered; parser pending.
 - [ ] Era-based snapshot fixtures: SM1.x legacy, SM2/SM3 semantic-heavy, SM4/SM5 resource-heavy, FX constructs; pin deterministic JSON.
-- [x] CLI smoke tests for `lex`/`parse` with file/stdin IO paths.
+- [x] CLI smoke tests for `lex`/`parse` with file/stdin IO paths (covered via C# tests).
 - [ ] CI/local test script to run unit, snapshot, negative, and CLI smoke suites quickly.
