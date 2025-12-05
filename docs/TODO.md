@@ -23,8 +23,8 @@
 
 ## FX Framework Constructs (cross-era)
 - [x] Lexer: `technique`, `technique10`, `pass`, directives inside FX blocks.
-- [ ] Parser: `technique`/`pass` blocks, `CompileShader(...)`, `SetPixelShader(...)` parsed as syntax without semantics.
-- [x] Tests: FX construct lex coverage and snapshot of a representative .fx file.
+- [x] Parser: `technique`/`pass` blocks, `CompileShader(...)`, `SetPixelShader(...)` parsed as syntax without semantics.
+- [x] Tests: FX construct lex coverage, snapshot of a representative .fx file, and parser coverage for technique/pass bodies.
 
 ## Parser Coverage (syntax-only)
 - [x] Always emit `CompilationUnit` with deterministic child order and spans.

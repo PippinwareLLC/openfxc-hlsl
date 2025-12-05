@@ -23,7 +23,7 @@
   - SM1.x: sampler declarations, `sampler_state` blocks, legacy semantics/registers accepted by FXC.
   - SM2/SM3: parameter/return semantics, register annotations, sampler-heavy functions.
   - SM4/SM5: `cbuffer`/`tbuffer`, resource templates, class/interface/method syntax, resource binding forms.
-- [ ] **M6: FX Constructs Parsing**
+- [x] **M6: FX Constructs Parsing**
   - Parse `technique`/`technique10`/`pass` blocks and `CompileShader`/`Set*Shader` forms as syntax-only.
   - Representative `.fx` parser snapshot.
 - [ ] **M7: Snapshots & Determinism**

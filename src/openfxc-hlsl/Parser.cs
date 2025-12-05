@@ -71,6 +71,11 @@ internal sealed class Parser
             return ParseStructLike(startToken.Kind);
         }
 
+        if (startToken.Kind is "KeywordTechnique" or "KeywordTechnique10")
+        {
+            return ParseTechnique(startToken.Kind);
+        }
+
         // CBuffer/TBuffer blocks
         if (startToken.Kind is "KeywordCBuffer" or "KeywordTBuffer")
         {
@@ -828,6 +833,92 @@ internal sealed class Parser
                 Children = children.ToArray()
             };
         }
+    }
+
+    private AstNode ParseTechnique(string kind)
+    {
+        var start = Consume().Span.Start; // technique/technique10
+        var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
+        var children = new List<AstChild> { new AstChild { Role = "identifier", Node = Leaf("Identifier", name) } };
+
+        if (!Match("OpenBrace"))
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' to start technique body.", CurrentSpan());
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = "TechniqueDeclaration",
+                Span = CurrentSpan(),
+                Children = children.ToArray()
+            };
+        }
+
+        var bodyStartTok = ConsumeExpected("OpenBrace");
+        var bodyMembers = new List<AstChild>();
+        while (!IsEnd && !Match("CloseBrace"))
+        {
+            if (Match("KeywordPass"))
+            {
+                var pass = ParsePass();
+                bodyMembers.Add(new AstChild { Role = "pass", Node = pass });
+                continue;
+            }
+
+            // Skip unexpected tokens inside technique body.
+            AddDiagnostic("HLSL1001", $"Unexpected token '{Current?.Text}'.", CurrentSpan());
+            Consume();
+        }
+
+        var bodyEnd = Match("CloseBrace") ? Consume().Span.End : CurrentSpan().End;
+        var bodyNode = new AstNode
+        {
+            Id = NextId(),
+            Kind = "TechniqueBody",
+            Span = new Span { Start = bodyStartTok.Span.Start, End = bodyEnd },
+            Children = bodyMembers.ToArray()
+        };
+        children.Add(new AstChild { Role = "body", Node = bodyNode });
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = kind == "KeywordTechnique10" ? "Technique10Declaration" : "TechniqueDeclaration",
+            Span = new Span { Start = start, End = bodyEnd },
+            Children = children.ToArray()
+        };
+    }
+
+    private AstNode ParsePass()
+    {
+        var start = Consume().Span.Start; // pass
+        var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
+        var children = new List<AstChild> { new AstChild { Role = "identifier", Node = Leaf("Identifier", name) } };
+
+        AstNode body;
+        if (Match("OpenBrace"))
+        {
+            body = ParseBlock();
+        }
+        else
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' to start pass body.", CurrentSpan());
+            body = new AstNode
+            {
+                Id = NextId(),
+                Kind = "Block",
+                Span = CurrentSpan(),
+                Children = Array.Empty<AstChild>()
+            };
+        }
+
+        children.Add(new AstChild { Role = "body", Node = body });
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "PassDeclaration",
+            Span = new Span { Start = start, End = body.Span.End },
+            Children = children.ToArray()
+        };
     }
 
     private Span ConsumeBlockSpan()
