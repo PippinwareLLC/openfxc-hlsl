@@ -25,11 +25,14 @@ Current output (M1) includes a basic lexer for SM1.x-era syntax; parse still emi
 - Scope: Syntax-only SM1-SM5 FXC-era HLSL (no semantics, IR, or bytecode in this layer)
 - Milestones: `docs/MILESTONES.md`
 
+## Contributing
+We take contributions from the community for .hlsl/.fx files for SM1-SM5, please send us your shader code or fixes/addition via PR. Thank you!
+
 ## Compatibility Matrix (FXC-era Syntax Only)
 
 | Shader Model / Era | Lexing | Parsing | Notes |
 | ------------------ | ------ | ------- | ----- |
-| SM1.x (legacy D3D9) | In progress | Skeleton | Lexer covers legacy sampler/texture keywords, comments, numbers, operators; parsing still stub |
+| SM1.x (legacy D3D9) | Done | Skeleton | Lexer covers legacy sampler/texture keywords, comments, numbers, operators; parsing still stub |
 | SM2.x / SM3.x | Skeleton | Skeleton | M0 stub JSON; semantics/registers/intrinsics to follow |
 | SM4.x | Skeleton | Skeleton | M0 stub JSON; cbuffers/resources/classes to follow |
 | SM5.x | Skeleton | Skeleton | M0 stub JSON; RW resources/advanced buffers to follow |
