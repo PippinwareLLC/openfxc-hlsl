@@ -14,7 +14,7 @@ This project was created by peeling off the commits from Pippinware LLCs' in-pro
 2. Lex: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe lex -i path/to/file.hlsl`
 3. Parse: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe parse -i path/to/file.hlsl`
 
-Current output includes full lexing for SM1–SM5 and FX constructs; parsing produces a `CompilationUnit` AST with spans/diagnostics and baseline statements/expressions/decls (syntax-only, no semantics). Schema matches `docs/TDD.md`.
+Current output includes full lexing for SM1–SM5 and FX constructs; parsing now covers era-specific declarations (samplers/sampler_state, semantics/register/bindings, cbuffer/tbuffer, class/interface/struct bodies, typedefs) with a `CompilationUnit` AST and diagnostics (syntax-only, no semantics). Schema matches `docs/TDD.md`.
 
 ## Testing
 - Run all tests: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj`
@@ -32,8 +32,8 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 
 | Shader Model / Era | Lexing | Parsing | Notes |
 | ------------------ | ------ | ------- | ----- |
-| SM1.x (legacy D3D9) | Done | Baseline | Lexer covers legacy sampler/texture keywords, comments, numbers, operators; parser handles basic decls/blocks/flow |
-| SM2.x / SM3.x | Done | Baseline | Lexer covers flow/storage, vector/matrix, semantics/register/register(), intrinsics; parser handles basic decls/blocks/flow |
-| SM4.x | Done | Baseline | Lexer covers cbuffers/tbuffers, resources, class/interface tokens; parser handles basic decls/blocks/flow |
-| SM5.x | Done | Baseline | Lexer covers RW resources, structured/byte address buffers; parser handles basic decls/blocks/flow |
-| FX constructs (.fx) | Done | Baseline | Lexer covers technique/technique10/pass and Compile/Set* shader calls; parser handles basic decls/blocks/flow |
+| SM1.x (legacy D3D9) | Done | Era parsing | Samplers, `sampler_state` blocks, semantics/register annotations, core statements/expressions |
+| SM2.x / SM3.x | Done | Era parsing | Functions with parameter/return semantics, structs/typedefs, arrays, control flow, sampler-heavy code |
+| SM4.x | Done | Era parsing | `cbuffer`/`tbuffer` with bindings, resource templates, class/interface/method signatures |
+| SM5.x | Done | Era parsing | RW/structured/byte address resources with bindings and expressions/statements |
+| FX constructs (.fx) | Done | Baseline | Lexer covers technique/technique10/pass and Compile/Set* shader calls; parser for FX blocks pending |

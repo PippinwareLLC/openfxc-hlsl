@@ -19,7 +19,7 @@
   - Always emit `CompilationUnit`; establish node/span invariants.
   - Expressions (precedence, calls, indexing, member access), statements (if/else, loops, discard), declarations (scalars/vectors/matrices/arrays/structs/typedefs).
   - Recovery for missing semicolons/braces and unexpected tokens with diagnostics.
-- [ ] **M5: Era-Specific Parsing to Parity**
+- [x] **M5: Era-Specific Parsing to Parity**
   - SM1.x: sampler declarations, `sampler_state` blocks, legacy semantics/registers accepted by FXC.
   - SM2/SM3: parameter/return semantics, register annotations, sampler-heavy functions.
   - SM4/SM5: `cbuffer`/`tbuffer`, resource templates, class/interface/method syntax, resource binding forms.

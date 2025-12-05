@@ -61,6 +61,11 @@ internal sealed class Parser
             return null;
         }
 
+        if (startToken.Kind == "KeywordTypedef")
+        {
+            return ParseTypedef();
+        }
+
         if (startToken.Kind is "KeywordStruct" or "KeywordClass" or "KeywordInterface")
         {
             return ParseStructLike(startToken.Kind);
@@ -79,50 +84,84 @@ internal sealed class Parser
         }
 
         // Heuristic: type identifier ... if followed by "(" treat as function, else variable.
-        if (IsTypeLike(startToken) && (Peek(1)?.Kind == "Identifier" || Peek(1)?.Kind == "Less"))
+        if (IsTypeLike(startToken))
         {
-            if (Peek(2) is { Kind: "OpenParen" })
+            if (LooksLikeFunctionSignature())
             {
                 return ParseFunction();
             }
 
-            return ParseVariableDeclaration();
+            if (Peek(1) is { Kind: "Identifier" } || Peek(1) is { Kind: "Less" })
+            {
+                return ParseVariableDeclaration();
+            }
         }
 
         // Fallback: expression statement at top level.
         return ParseExpressionStatement();
     }
 
-    private AstNode ParseFunction()
+    private AstNode ParseFunction() => ParseFunctionLike(allowSignatureOnly: false);
+
+    private AstNode ParseFunctionLike(bool allowSignatureOnly)
     {
         var start = Current!.Span.Start;
         var children = new List<AstChild>();
 
-        // return type
         var returnType = Consume();
         children.Add(new AstChild { Role = "type", Node = Leaf("Type", returnType) });
 
-        var name = Consume(); // identifier
+        if (Match("Less"))
+        {
+            ConsumeTemplateArguments();
+        }
+
+        Token name;
+        if (Match("Identifier"))
+        {
+            name = Consume();
+        }
+        else
+        {
+            name = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+            AddDiagnostic("HLSL1001", "Expected identifier in function declaration.", CurrentSpan());
+        }
         children.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", name) });
 
         var parameters = ParseParameterList();
         children.AddRange(parameters.Select(p => new AstChild { Role = "parameter", Node = p }));
 
-        // Optional return semantics colon IDENT
-        if (Match("Colon"))
+        foreach (var annotation in ParseAnnotations(new[] { "OpenBrace", "Semicolon" }))
         {
-            var sem = Consume();
-            if (Current is not null)
-            {
-                var semIdent = Consume();
-                children.Add(new AstChild { Role = "semantic", Node = Leaf("Semantic", semIdent) });
-            }
+            children.Add(annotation);
         }
 
         AstNode body;
         if (Match("OpenBrace"))
         {
             body = ParseBlock();
+        }
+        else if (allowSignatureOnly && Match("Semicolon"))
+        {
+            var semi = Consume();
+            body = new AstNode
+            {
+                Id = NextId(),
+                Kind = "EmptyBody",
+                Span = semi.Span,
+                Children = Array.Empty<AstChild>()
+            };
+        }
+        else if (allowSignatureOnly)
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' or ';' after function signature.", CurrentSpan());
+            body = new AstNode
+            {
+                Id = NextId(),
+                Kind = "EmptyBody",
+                Span = CurrentSpan(),
+                Children = Array.Empty<AstChild>()
+            };
         }
         else
         {
@@ -677,7 +716,76 @@ internal sealed class Parser
         }
     }
 
-    private AstNode ParseStructLike(string kind)
+    private AstNode ParseTypedef()
+    {
+        var start = Consume().Span.Start; // typedef
+        var children = new List<AstChild>();
+
+        AstNode typeNode;
+        if (Match("KeywordStruct") || Match("KeywordClass") || Match("KeywordInterface"))
+        {
+            typeNode = ParseStructLike(Current!.Kind, consumeTrailingSemicolon: false);
+        }
+        else
+        {
+            var typeTok = Consume();
+            typeNode = Leaf("Type", typeTok);
+            if (Match("Less"))
+            {
+                ConsumeTemplateArguments();
+            }
+        }
+        children.Add(new AstChild { Role = "type", Node = typeNode });
+
+        Token aliasTok;
+        if (Match("Identifier"))
+        {
+            aliasTok = Consume();
+        }
+        else
+        {
+            aliasTok = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+            AddDiagnostic("HLSL1001", "Expected identifier in typedef.", CurrentSpan());
+        }
+        children.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", aliasTok) });
+
+        while (Match("OpenBracket"))
+        {
+            var arrStart = Consume().Span.Start;
+            var sizeExpr = ParseExpression();
+            ConsumeExpected("CloseBracket");
+            var arrEnd = sizeExpr?.Span.End ?? CurrentSpan().End;
+            children.Add(new AstChild
+            {
+                Role = "array",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "ArrayDeclarator",
+                    Span = new Span { Start = arrStart, End = arrEnd },
+                    Children = sizeExpr is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "size", Node = sizeExpr } }
+                }
+            });
+        }
+
+        foreach (var annotation in ParseAnnotations(new[] { "Semicolon" }))
+        {
+            children.Add(annotation);
+        }
+
+        ConsumeExpected("Semicolon");
+
+        var end = children.Last().Node.Span.End;
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "TypedefDeclaration",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
+    private AstNode ParseStructLike(string kind, bool consumeTrailingSemicolon = true)
     {
         var start = Consume().Span.Start; // struct/class/interface
         var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
@@ -694,24 +802,18 @@ internal sealed class Parser
 
         if (Match("OpenBrace"))
         {
-            var bodySpan = ConsumeBlockSpan();
-            children.Add(new AstChild
+            var body = ParseStructBody();
+            children.Add(new AstChild { Role = "body", Node = body });
+            Token? terminator = null;
+            if (consumeTrailingSemicolon)
             {
-                Role = "body",
-                Node = new AstNode
-                {
-                    Id = NextId(),
-                    Kind = "TypeBody",
-                    Span = bodySpan,
-                    Children = Array.Empty<AstChild>()
-                }
-            });
-            ConsumeExpected("Semicolon");
+                terminator = ConsumeExpected("Semicolon");
+            }
             return new AstNode
             {
                 Id = NextId(),
                 Kind = kind == "KeywordStruct" ? "StructDeclaration" : kind == "KeywordClass" ? "ClassDeclaration" : "InterfaceDeclaration",
-                Span = new Span { Start = start, End = children.Last().Node.Span.End },
+                Span = new Span { Start = start, End = terminator?.Span.End ?? body.Span.End },
                 Children = children.ToArray()
             };
         }
@@ -747,6 +849,57 @@ internal sealed class Parser
             Consume();
         }
         return new Span { Start = startTok.Span.Start, End = end };
+    }
+
+    private AstNode ParseStructBody()
+    {
+        var start = ConsumeExpected("OpenBrace").Span.Start;
+        var members = new List<AstChild>();
+
+        while (!IsEnd && !Match("CloseBrace"))
+        {
+            if (Match("Semicolon"))
+            {
+                Consume();
+                continue;
+            }
+
+            if (Match("KeywordStruct") || Match("KeywordClass") || Match("KeywordInterface"))
+            {
+                var nested = ParseStructLike(Current!.Kind);
+                members.Add(new AstChild { Role = "member", Node = nested });
+                continue;
+            }
+
+            if (IsTypeLike(Current!))
+            {
+                if (LooksLikeFunctionSignature())
+                {
+                    var method = ParseFunctionLike(allowSignatureOnly: true);
+                    members.Add(new AstChild { Role = "member", Node = method });
+                    continue;
+                }
+
+                if (Peek(1) is { Kind: "Identifier" } || Peek(1) is { Kind: "Less" })
+                {
+                    var decl = ParseVariableDeclaration();
+                    members.Add(new AstChild { Role = "member", Node = decl });
+                    continue;
+                }
+            }
+
+            AddDiagnostic("HLSL1001", $"Unexpected token '{Current?.Text}'.", CurrentSpan());
+            Consume();
+        }
+
+        var end = Match("CloseBrace") ? Consume().Span.End : CurrentSpan().End;
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "TypeBody",
+            Span = new Span { Start = start, End = end },
+            Children = members.ToArray()
+        };
     }
 
     private AstNode? ParseExpression(int precedence = 0)
@@ -950,6 +1103,51 @@ internal sealed class Parser
 
     private bool IsBinaryOperator(Token token) =>
         token.Kind is "Plus" or "Minus" or "Star" or "Slash" or "Percent" or "Equals";
+
+    private bool LooksLikeFunctionSignature()
+    {
+        if (!IsTypeLike(Current!))
+        {
+            return false;
+        }
+
+        var lookahead = 1;
+        if (Peek(lookahead)?.Kind == "Less")
+        {
+            var depth = 0;
+            while (true)
+            {
+                var tok = Peek(lookahead);
+                if (tok is null)
+                {
+                    return false;
+                }
+
+                if (tok.Kind == "Less")
+                {
+                    depth++;
+                }
+                else if (tok.Kind == "Greater")
+                {
+                    depth--;
+                    if (depth <= 0)
+                    {
+                        lookahead++;
+                        break;
+                    }
+                }
+                lookahead++;
+            }
+        }
+
+        var nameTok = Peek(lookahead);
+        if (nameTok?.Kind != "Identifier")
+        {
+            return false;
+        }
+
+        return Peek(lookahead + 1)?.Kind == "OpenParen";
+    }
 
     private Token Consume()
     {
