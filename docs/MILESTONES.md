@@ -12,7 +12,7 @@
   - Flow/storage keywords, vector/matrix types, semantics/register forms.
   - Intrinsic-style identifiers and sampler usage.
   - Tests for semantics/register tokens and expression-friendly tokens.
-- [ ] **M3: Lexer SM4/SM5 Coverage**
+- [x] **M3: Lexer SM4/SM5 Coverage**
   - Resource keywords (`cbuffer`, `tbuffer`, `Texture*`, `StructuredBuffer`, `RW*`, `ByteAddressBuffer`) and class/interface tokens.
   - Tests for template-like resource forms and binding tokens.
 - [ ] **M4: Parser Baseline (All Eras)**

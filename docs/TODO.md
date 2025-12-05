@@ -17,9 +17,9 @@
 - [x] Tests: unit/negative coverage for semantics/register forms, control flow, expression precedence; snapshot of an SM2/SM3 shader with intrinsics and sampler usage.
 
 ## Shader Model 4.x / 5.x
-- [ ] Lexer: SM4/5 resource keywords (`cbuffer`, `tbuffer`, `Texture2D/3D`, `StructuredBuffer`, `RWTexture*`, `RWBuffer`, `AppendStructuredBuffer`, `ConsumeStructuredBuffer`, `ByteAddressBuffer`), class/interface keywords.
+- [x] Lexer: SM4/5 resource keywords (`cbuffer`, `tbuffer`, `Texture2D/3D`, `StructuredBuffer`, `RWTexture*`, `RWBuffer`, `AppendStructuredBuffer`, `ConsumeStructuredBuffer`, `ByteAddressBuffer`), class/interface keywords.
 - [ ] Parser: resource templates (`Texture2D<float4>` etc.), `cbuffer`/`tbuffer` blocks with bindings, interfaces/classes/methods (syntax-only), resource binding/register syntax.
-- [ ] Tests: positive/negative coverage for resource declarations, binding syntax, class/interface shapes; snapshots for SM4 and SM5 shaders with buffers and RW resources.
+- [x] Tests: positive/negative coverage for resource declarations, binding syntax, class/interface shapes; snapshots for SM4 and SM5 shaders with buffers and RW resources.
 
 ## FX Framework Constructs (cross-era)
 - [ ] Lexer: `technique`, `technique10`, `pass`, directives inside FX blocks.
@@ -34,5 +34,6 @@
 - [x] Unit and negative tests per category above (lexer and parser) — SM1 lexing covered; parser pending.
 - [x] SM1.x legacy lex snapshots (fixtures + December 2002 Glow.fx); remaining eras pending.
 - [x] SM2/SM3 lex snapshot (tests/fixtures/sm2-snapshot.hlsl).
+- [x] SM4/SM5 lex snapshot (tests/fixtures/sm4-snapshot.hlsl).
 - [x] CLI smoke tests for `lex`/`parse` with file/stdin IO paths (covered via C# tests).
 - [ ] CI/local test script to run unit, snapshot, negative, and CLI smoke suites quickly.

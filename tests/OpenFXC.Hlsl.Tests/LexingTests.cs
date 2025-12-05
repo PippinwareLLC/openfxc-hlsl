@@ -76,4 +76,22 @@ public class LexingTests
         Assert.True(JsonNode.DeepEquals(actualNode, expectedNode), "Snapshot mismatch for sm2-snapshot.hlsl");
     }
 
+    [Fact]
+    public void Sm4SnapshotMatches()
+    {
+        var fixturePath = Path.Combine(RepoRoot, "tests", "fixtures", "sm4-snapshot.hlsl");
+        var expectedPath = Path.Combine(RepoRoot, "tests", "snapshots", "sm4-snapshot.lex.json");
+
+        var text = File.ReadAllText(fixturePath);
+        var expectedJson = File.ReadAllText(expectedPath);
+
+        var (tokens, diagnostics) = HlslLexer.Lex(text);
+        var result = new LexResult(FormatVersion, new SourceInfo("sm4-snapshot.hlsl", text.Length), tokens, diagnostics);
+
+        var actualNode = JsonNode.Parse(JsonSerializer.Serialize(result, SerializerOptions))!;
+        var expectedNode = JsonNode.Parse(expectedJson)!;
+
+        Assert.True(JsonNode.DeepEquals(actualNode, expectedNode), "Snapshot mismatch for sm4-snapshot.hlsl");
+    }
+
 }

@@ -97,6 +97,30 @@ public class AdditionalLexingTests
     }
 
     [Fact]
+    public void Sm4ResourceKeywordsLex()
+    {
+        var text = "cbuffer tbuffer Texture2D Texture2DArray Texture3D TextureCube StructuredBuffer RWStructuredBuffer RWTexture2D RWTexture3D RWBuffer AppendStructuredBuffer ConsumeStructuredBuffer ByteAddressBuffer RWByteAddressBuffer class interface";
+        var (tokens, diagnostics) = HlslLexer.Lex(text);
+
+        Assert.Empty(diagnostics);
+        var kinds = tokens.Select(t => t.Kind).ToHashSet();
+        Assert.Contains("KeywordCBuffer", kinds);
+        Assert.Contains("KeywordTBuffer", kinds);
+        Assert.Contains("KeywordTexture2D", kinds);
+        Assert.Contains("KeywordTexture3D", kinds);
+        Assert.Contains("KeywordStructuredBuffer", kinds);
+        Assert.Contains("KeywordRWStructuredBuffer", kinds);
+        Assert.Contains("KeywordRWTexture3D", kinds);
+        Assert.Contains("KeywordRWBuffer", kinds);
+        Assert.Contains("KeywordAppendStructuredBuffer", kinds);
+        Assert.Contains("KeywordConsumeStructuredBuffer", kinds);
+        Assert.Contains("KeywordByteAddressBuffer", kinds);
+        Assert.Contains("KeywordRWByteAddressBuffer", kinds);
+        Assert.Contains("KeywordClass", kinds);
+        Assert.Contains("KeywordInterface", kinds);
+    }
+
+    [Fact]
     public void GlowSampleSnapshotMatches()
     {
         var repoRoot = TestPaths.FindRepoRoot();
