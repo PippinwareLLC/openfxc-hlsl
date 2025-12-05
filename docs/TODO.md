@@ -3,8 +3,8 @@
 ## Foundation
 - [x] Stand up the `openfxc-hlsl` CLI skeleton with `lex` and `parse` verbs that accept file/stdin and emit JSON per `docs/TDD.md`.
 - [x] Enforce JSON schema conformance (`formatVersion: 1`, source metadata, tokens, diagnostics) for both lex and parse outputs.
-- [ ] Stabilize diagnostic IDs/messages and ensure spans satisfy `0 <= start <= end <= length` on all tokens and nodes.
-- [ ] Preserve trivia (whitespace/newlines/comments) and preprocessor lines as specified; ensure operator/punctuation coverage across eras.
+- [x] Stabilize diagnostic IDs/messages and ensure spans satisfy `0 <= start <= end <= length` on all tokens and nodes.
+- [x] Preserve trivia (whitespace/newlines/comments) and preprocessor lines as specified; ensure operator/punctuation coverage across eras.
 
 ## Shader Model 1.x (legacy D3D9 era)
 - [x] Lexer: legacy sampler/texture keywords (`sampler`, `sampler1D/2D/3D/CUBE`, `texture`), basic numeric literals, directives.

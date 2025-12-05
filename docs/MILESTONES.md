@@ -32,6 +32,6 @@
 - [x] **M8: Tooling & CI**
   - Consolidated test runner for unit/negative/snapshot/CLI smoke suites.
   - README/Docs kept in sync with surface and behavior.
-- [ ] **M9: Release Readiness (Parser Parity)**
+- [x] **M9: Release Readiness (Parser Parity)**
   - Full SM1–SM5 syntax parity per `docs/TDD.md`, no known crashers, stable diagnostics.
   - Compatibility matrix updated to reflect completed parser coverage.

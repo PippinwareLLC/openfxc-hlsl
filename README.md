@@ -26,6 +26,7 @@ Current output includes full lexing for SM1–SM5 and FX constructs; parsing now
 - Work queue: `docs/TODO.md`
 - Scope: Syntax-only SM1-SM5 FXC-era HLSL (no semantics, IR, or bytecode in this layer)
 - Milestones: `docs/MILESTONES.md`
+- Architecture: `docs/LEXER_PARSER.md` (lexer/parser internals, diagnostics, recovery, determinism)
 
 ## Contributing
 We take contributions from the community for .hlsl/.fx files for SM1-SM5, please send us your shader code or fixes/addition via PR. Thank you!
@@ -34,8 +35,8 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 
 | Shader Model / Era | Lexing | Parsing | Notes |
 | ------------------ | ------ | ------- | ----- |
-| SM1.x (legacy D3D9) | Done | Era parsing | Samplers, `sampler_state` blocks, semantics/register annotations, core statements/expressions |
-| SM2.x / SM3.x | Done | Era parsing | Functions with parameter/return semantics, structs/typedefs, arrays, control flow, sampler-heavy code |
-| SM4.x | Done | Era parsing | `cbuffer`/`tbuffer` with bindings, resource templates, class/interface/method signatures |
-| SM5.x | Done | Era parsing | RW/structured/byte address resources with bindings and expressions/statements |
-| FX constructs (.fx) | Done | FX parsing | Lexer covers technique/technique10/pass and Compile/Set* shader calls; parser handles technique/pass bodies syntax-only |
+| SM1.x (legacy D3D9) | Done | Complete | Samplers, `sampler_state` blocks, semantics/register annotations, core statements/expressions |
+| SM2.x / SM3.x | Done | Complete | Functions with parameter/return semantics, structs/typedefs, arrays, control flow, sampler-heavy code |
+| SM4.x | Done | Complete | `cbuffer`/`tbuffer` with bindings, resource templates, class/interface/method signatures |
+| SM5.x | Done | Complete | RW/structured/byte address resources with bindings and expressions/statements |
+| FX constructs (.fx) | Done | Complete | Technique/technique10/pass bodies parsed syntax-only, Compile/Set shader calls tokenized |
