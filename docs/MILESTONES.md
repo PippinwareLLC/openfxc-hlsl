@@ -19,19 +19,19 @@
   - Always emit `CompilationUnit`; establish node/span invariants.
   - Expressions (precedence, calls, indexing, member access), statements (if/else, loops, discard), declarations (scalars/vectors/matrices/arrays/structs/typedefs).
   - Recovery for missing semicolons/braces and unexpected tokens with diagnostics.
-- [x] **M5: Era-Specific Parsing**
-  - SM1.x: sampler declarations and `sampler_state` blocks parsed as syntax.
+- [ ] **M5: Era-Specific Parsing to Parity**
+  - SM1.x: sampler declarations, `sampler_state` blocks, legacy semantics/registers accepted by FXC.
   - SM2/SM3: parameter/return semantics, register annotations, sampler-heavy functions.
-  - SM4/SM5: `cbuffer`/`tbuffer`, resource templates, class/interface/method syntax.
-- [ ] **M6: FX Constructs**
+  - SM4/SM5: `cbuffer`/`tbuffer`, resource templates, class/interface/method syntax, resource binding forms.
+- [ ] **M6: FX Constructs Parsing**
   - Parse `technique`/`technique10`/`pass` blocks and `CompileShader`/`Set*Shader` forms as syntax-only.
-  - Snapshot for a representative `.fx` file.
+  - Representative `.fx` parser snapshot.
 - [ ] **M7: Snapshots & Determinism**
-  - Era-based snapshot suite (SM1.x, SM2/SM3, SM4, SM5, FX) pinning token/AST JSON shape.
+  - Era-based parser snapshot suite (SM1.x, SM2/SM3, SM4, SM5, FX) pinning AST/tokens/diagnostics.
   - Deterministic ordering and spans across runs.
 - [ ] **M8: Tooling & CI**
   - Consolidated test runner for unit/negative/snapshot/CLI smoke suites.
   - README/Docs kept in sync with surface and behavior.
-- [ ] **M9: Release Readiness**
+- [ ] **M9: Release Readiness (Parser Parity)**
   - Full SM1–SM5 syntax parity per `docs/TDD.md`, no known crashers, stable diagnostics.
-  - Compatibility matrix updated to reflect completed coverage.
+  - Compatibility matrix updated to reflect completed parser coverage.

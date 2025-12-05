@@ -28,11 +28,12 @@
 
 ## Parser Coverage (syntax-only)
 - [x] Always emit `CompilationUnit` with deterministic child order and spans.
-- [x] Types and declarations: scalars, vectors, matrices, resource templates, global variables with initializers.
+- [x] Types and declarations: scalars, vectors, matrices, resource templates; global variables with initializers.
+- [ ] Composite types: arrays, structs, typedefs, class/interface bodies.
 - [x] Functions and parameters: parameter lists with semantics/register annotations (syntax-only), return semantics; overloadable signatures pending.
 - [x] Expressions: precedence-aware unary/binary, calls, indexing, member access; assignment partially covered.
 - [x] Statements: blocks, if/else, for/while/do-while, return, break/continue, discard.
-- [x] Semantics and registers: `: SEMANTIC`, `: register(...)` captured as annotations (syntax-only).
+- [ ] Semantics and registers: richer annotation capture and binding syntax (register(c0)/packoffset/etc.).
 - [x] Legacy sampler/texture syntax (SM1-SM3): sampler declarations and sampler_state blocks.
 - [x] SM4/SM5 constructs: `cbuffer`/`tbuffer` blocks (syntax-only bodies) and resource declarations.
 - [x] FX framework constructs: `technique`, `technique10`, `pass`, `CompileShader(...)`, `SetPixelShader(...)` parsed as syntax.

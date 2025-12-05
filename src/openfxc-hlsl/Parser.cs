@@ -61,6 +61,11 @@ internal sealed class Parser
             return null;
         }
 
+        if (startToken.Kind is "KeywordStruct" or "KeywordClass" or "KeywordInterface")
+        {
+            return ParseStructLike(startToken.Kind);
+        }
+
         // CBuffer/TBuffer blocks
         if (startToken.Kind is "KeywordCBuffer" or "KeywordTBuffer")
         {
@@ -167,6 +172,25 @@ internal sealed class Parser
             AddDiagnostic("HLSL1001", "Expected identifier in declaration.", CurrentSpan());
         }
         children.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", identTok) });
+
+        while (Match("OpenBracket"))
+        {
+            var startArr = Consume().Span.Start;
+            var sizeExpr = ParseExpression();
+            ConsumeExpected("CloseBracket");
+            var endArr = sizeExpr?.Span.End ?? CurrentSpan().End;
+            children.Add(new AstChild
+            {
+                Role = "array",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "ArrayDeclarator",
+                    Span = new Span { Start = startArr, End = endArr },
+                    Children = sizeExpr is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "size", Node = sizeExpr } }
+                }
+            });
+        }
 
         foreach (var annotation in ParseAnnotations(new[] { "Semicolon", "Equals" }))
         {
@@ -647,6 +671,57 @@ internal sealed class Parser
             {
                 Id = NextId(),
                 Kind = "BufferDeclaration",
+                Span = CurrentSpan(),
+                Children = children.ToArray()
+            };
+        }
+    }
+
+    private AstNode ParseStructLike(string kind)
+    {
+        var start = Consume().Span.Start; // struct/class/interface
+        var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
+        var children = new List<AstChild> { new AstChild { Role = "identifier", Node = Leaf("Identifier", name) } };
+
+        if (Match("Colon"))
+        {
+            Consume();
+            while (!IsEnd && !Match("OpenBrace"))
+            {
+                Consume();
+            }
+        }
+
+        if (Match("OpenBrace"))
+        {
+            var bodySpan = ConsumeBlockSpan();
+            children.Add(new AstChild
+            {
+                Role = "body",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "TypeBody",
+                    Span = bodySpan,
+                    Children = Array.Empty<AstChild>()
+                }
+            });
+            ConsumeExpected("Semicolon");
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = kind == "KeywordStruct" ? "StructDeclaration" : kind == "KeywordClass" ? "ClassDeclaration" : "InterfaceDeclaration",
+                Span = new Span { Start = start, End = children.Last().Node.Span.End },
+                Children = children.ToArray()
+            };
+        }
+        else
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' to start type body.", CurrentSpan());
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = kind,
                 Span = CurrentSpan(),
                 Children = children.ToArray()
             };
