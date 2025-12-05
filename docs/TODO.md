@@ -50,4 +50,4 @@
 - [x] SM4/SM5 lex snapshot (tests/fixtures/sm4-snapshot.hlsl).
 - [x] Parser snapshots per era (SM1, SM2/3, SM4, SM5, FX) covering AST/tokens/diagnostics.
 - [x] CLI smoke tests for `lex`/`parse` with file/stdin IO paths (covered via C# tests).
-- [ ] CI/local test script to run unit, snapshot, negative, and CLI smoke suites quickly.
+- [x] CI/local test script to run unit, snapshot, negative, and CLI smoke suites quickly.

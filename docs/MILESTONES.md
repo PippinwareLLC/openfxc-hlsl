@@ -29,7 +29,7 @@
 - [x] **M7: Snapshots & Determinism**
   - Era-based parser snapshot suite (SM1.x, SM2/SM3, SM4, SM5, FX) pinning AST/tokens/diagnostics.
   - Deterministic ordering and spans across runs.
-- [ ] **M8: Tooling & CI**
+- [x] **M8: Tooling & CI**
   - Consolidated test runner for unit/negative/snapshot/CLI smoke suites.
   - README/Docs kept in sync with surface and behavior.
 - [ ] **M9: Release Readiness (Parser Parity)**
