@@ -1,0 +1,37 @@
+# Milestones
+
+- [x] **M0: Bootstrap**
+  - CLI skeleton for `openfxc-hlsl lex` / `parse` with stdin/file IO and JSON output per `docs/TDD.md`.
+  - Deterministic spans, trivia retention, and stable diagnostic IDs/messages.
+  - Basic smoke tests and CI wiring.
+- [ ] **M1: Lexer SM1.x Coverage**
+  - Whitespace/comment handling, legacy sampler/texture keywords, operators/punctuation, numeric literals.
+  - Preprocessor tokenization with trailing text captured as trivia.
+  - Positive/negative lexer tests and a representative SM1.x snapshot.
+- [ ] **M2: Lexer SM2/SM3 Coverage**
+  - Flow/storage keywords, vector/matrix types, semantics/register forms.
+  - Intrinsic-style identifiers and sampler usage.
+  - Tests for semantics/register tokens and expression-friendly tokens.
+- [ ] **M3: Lexer SM4/SM5 Coverage**
+  - Resource keywords (`cbuffer`, `tbuffer`, `Texture*`, `StructuredBuffer`, `RW*`, `ByteAddressBuffer`) and class/interface tokens.
+  - Tests for template-like resource forms and binding tokens.
+- [ ] **M4: Parser Baseline (All Eras)**
+  - Always emit `CompilationUnit`; establish node/span invariants.
+  - Expressions (precedence, swizzles, indexing, calls), statements (if/else, loops, discard), declarations (scalars/vectors/matrices/arrays/structs/typedefs).
+  - Recovery for missing semicolons/braces and unexpected tokens with diagnostics.
+- [ ] **M5: Era-Specific Parsing**
+  - SM1.x: sampler declarations and `sampler_state` blocks parsed as syntax.
+  - SM2/SM3: parameter/return semantics, register annotations, sampler-heavy functions.
+  - SM4/SM5: `cbuffer`/`tbuffer`, resource templates, class/interface/method syntax.
+- [ ] **M6: FX Constructs**
+  - Parse `technique`/`technique10`/`pass` blocks and `CompileShader`/`Set*Shader` forms as syntax-only.
+  - Snapshot for a representative `.fx` file.
+- [ ] **M7: Snapshots & Determinism**
+  - Era-based snapshot suite (SM1.x, SM2/SM3, SM4, SM5, FX) pinning token/AST JSON shape.
+  - Deterministic ordering and spans across runs.
+- [ ] **M8: Tooling & CI**
+  - Consolidated test runner for unit/negative/snapshot/CLI smoke suites.
+  - README/Docs kept in sync with surface and behavior.
+- [ ] **M9: Release Readiness**
+  - Full SM1–SM5 syntax parity per `docs/TDD.md`, no known crashers, stable diagnostics.
+  - Compatibility matrix updated to reflect completed coverage.
