@@ -44,9 +44,10 @@
 - [x] Tests: targeted negative cases for missing semicolon/braces; expand per era as parser grows.
 
 ## Testing and Snapshots
-- [x] Unit and negative tests per category above (lexer and parser) — SM1 lexing covered; parser pending.
-- [x] SM1.x legacy lex snapshots (fixtures + December 2002 Glow.fx); remaining eras pending.
+- [x] Unit and negative tests per category above (lexer and parser) across eras.
+- [x] SM1.x legacy lex snapshots (fixtures + December 2002 Glow.fx).
 - [x] SM2/SM3 lex snapshot (tests/fixtures/sm2-snapshot.hlsl).
 - [x] SM4/SM5 lex snapshot (tests/fixtures/sm4-snapshot.hlsl).
+- [x] Parser snapshots per era (SM1, SM2/3, SM4, SM5, FX) covering AST/tokens/diagnostics.
 - [x] CLI smoke tests for `lex`/`parse` with file/stdin IO paths (covered via C# tests).
 - [ ] CI/local test script to run unit, snapshot, negative, and CLI smoke suites quickly.

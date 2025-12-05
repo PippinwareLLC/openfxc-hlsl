@@ -18,6 +18,7 @@ Current output includes full lexing for SM1–SM5 and FX constructs; parsing now
 
 ## Testing
 - Run all tests: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj`
+- Snapshot coverage: lex + parse snapshots pinned per era (SM1, SM2/3, SM4, SM5) plus FX technique/pass to keep output deterministic.
 
 ## Docs
 - Behavioral contract: `docs/TDD.md`

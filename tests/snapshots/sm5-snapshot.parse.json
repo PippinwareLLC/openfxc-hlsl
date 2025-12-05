@@ -1,0 +1,2138 @@
+﻿{
+  "formatVersion": 1,
+  "source": {
+    "fileName": "sm5-snapshot.hlsl",
+    "length": 369
+  },
+  "root": {
+    "id": 63,
+    "kind": "CompilationUnit",
+    "span": {
+      "start": 0,
+      "end": 369
+    },
+    "children": [
+      {
+        "role": "declaration",
+        "node": {
+          "id": 3,
+          "kind": "BufferDeclaration",
+          "span": {
+            "start": 0,
+            "end": 58
+          },
+          "children": [
+            {
+              "role": "identifier",
+              "node": {
+                "id": 1,
+                "kind": "Identifier",
+                "span": {
+                  "start": 8,
+                  "end": 16
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "body",
+              "node": {
+                "id": 2,
+                "kind": "BufferBody",
+                "span": {
+                  "start": 32,
+                  "end": 58
+                },
+                "children": []
+              }
+            }
+          ]
+        }
+      },
+      {
+        "role": "declaration",
+        "node": {
+          "id": 11,
+          "kind": "VariableDeclaration",
+          "span": {
+            "start": 61,
+            "end": 110
+          },
+          "children": [
+            {
+              "role": "type",
+              "node": {
+                "id": 4,
+                "kind": "Type",
+                "span": {
+                  "start": 61,
+                  "end": 77
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "identifier",
+              "node": {
+                "id": 5,
+                "kind": "Identifier",
+                "span": {
+                  "start": 86,
+                  "end": 95
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "annotation",
+              "node": {
+                "id": 6,
+                "kind": "Annotation",
+                "span": {
+                  "start": 96,
+                  "end": 110
+                },
+                "children": [
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 7,
+                      "kind": "Token",
+                      "span": {
+                        "start": 98,
+                        "end": 106
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 8,
+                      "kind": "Token",
+                      "span": {
+                        "start": 106,
+                        "end": 107
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 9,
+                      "kind": "Token",
+                      "span": {
+                        "start": 107,
+                        "end": 109
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 10,
+                      "kind": "Token",
+                      "span": {
+                        "start": 109,
+                        "end": 110
+                      },
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "role": "declaration",
+        "node": {
+          "id": 19,
+          "kind": "VariableDeclaration",
+          "span": {
+            "start": 112,
+            "end": 153
+          },
+          "children": [
+            {
+              "role": "type",
+              "node": {
+                "id": 12,
+                "kind": "Type",
+                "span": {
+                  "start": 112,
+                  "end": 123
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "identifier",
+              "node": {
+                "id": 13,
+                "kind": "Identifier",
+                "span": {
+                  "start": 132,
+                  "end": 138
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "annotation",
+              "node": {
+                "id": 14,
+                "kind": "Annotation",
+                "span": {
+                  "start": 139,
+                  "end": 153
+                },
+                "children": [
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 15,
+                      "kind": "Token",
+                      "span": {
+                        "start": 141,
+                        "end": 149
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 16,
+                      "kind": "Token",
+                      "span": {
+                        "start": 149,
+                        "end": 150
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 17,
+                      "kind": "Token",
+                      "span": {
+                        "start": 150,
+                        "end": 152
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 18,
+                      "kind": "Token",
+                      "span": {
+                        "start": 152,
+                        "end": 153
+                      },
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "role": "declaration",
+        "node": {
+          "id": 27,
+          "kind": "VariableDeclaration",
+          "span": {
+            "start": 155,
+            "end": 192
+          },
+          "children": [
+            {
+              "role": "type",
+              "node": {
+                "id": 20,
+                "kind": "Type",
+                "span": {
+                  "start": 155,
+                  "end": 172
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "identifier",
+              "node": {
+                "id": 21,
+                "kind": "Identifier",
+                "span": {
+                  "start": 173,
+                  "end": 177
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "annotation",
+              "node": {
+                "id": 22,
+                "kind": "Annotation",
+                "span": {
+                  "start": 178,
+                  "end": 192
+                },
+                "children": [
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 23,
+                      "kind": "Token",
+                      "span": {
+                        "start": 180,
+                        "end": 188
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 24,
+                      "kind": "Token",
+                      "span": {
+                        "start": 188,
+                        "end": 189
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 25,
+                      "kind": "Token",
+                      "span": {
+                        "start": 189,
+                        "end": 191
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 26,
+                      "kind": "Token",
+                      "span": {
+                        "start": 191,
+                        "end": 192
+                      },
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "role": "declaration",
+        "node": {
+          "id": 49,
+          "kind": "FunctionDeclaration",
+          "span": {
+            "start": 195,
+            "end": 306
+          },
+          "children": [
+            {
+              "role": "type",
+              "node": {
+                "id": 28,
+                "kind": "Type",
+                "span": {
+                  "start": 195,
+                  "end": 201
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "identifier",
+              "node": {
+                "id": 29,
+                "kind": "Identifier",
+                "span": {
+                  "start": 202,
+                  "end": 204
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "parameter",
+              "node": {
+                "id": 34,
+                "kind": "Parameter",
+                "span": {
+                  "start": 205,
+                  "end": 226
+                },
+                "children": [
+                  {
+                    "role": "type",
+                    "node": {
+                      "id": 30,
+                      "kind": "Type",
+                      "span": {
+                        "start": 205,
+                        "end": 209
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "identifier",
+                    "node": {
+                      "id": 31,
+                      "kind": "Identifier",
+                      "span": {
+                        "start": 210,
+                        "end": 212
+                      },
+                      "children": []
+                    }
+                  },
+                  {
+                    "role": "annotation",
+                    "node": {
+                      "id": 32,
+                      "kind": "Annotation",
+                      "span": {
+                        "start": 213,
+                        "end": 226
+                      },
+                      "children": [
+                        {
+                          "role": "token",
+                          "node": {
+                            "id": 33,
+                            "kind": "Token",
+                            "span": {
+                              "start": 215,
+                              "end": 226
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "role": "annotation",
+              "node": {
+                "id": 35,
+                "kind": "Annotation",
+                "span": {
+                  "start": 228,
+                  "end": 241
+                },
+                "children": [
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 36,
+                      "kind": "Token",
+                      "span": {
+                        "start": 230,
+                        "end": 241
+                      },
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "role": "body",
+              "node": {
+                "id": 48,
+                "kind": "Block",
+                "span": {
+                  "start": 242,
+                  "end": 306
+                },
+                "children": [
+                  {
+                    "role": "statement",
+                    "node": {
+                      "id": 42,
+                      "kind": "VariableDeclaration",
+                      "span": {
+                        "start": 248,
+                        "end": 273
+                      },
+                      "children": [
+                        {
+                          "role": "type",
+                          "node": {
+                            "id": 37,
+                            "kind": "Type",
+                            "span": {
+                              "start": 248,
+                              "end": 254
+                            },
+                            "children": []
+                          }
+                        },
+                        {
+                          "role": "identifier",
+                          "node": {
+                            "id": 38,
+                            "kind": "Identifier",
+                            "span": {
+                              "start": 255,
+                              "end": 258
+                            },
+                            "children": []
+                          }
+                        },
+                        {
+                          "role": "initializer",
+                          "node": {
+                            "id": 41,
+                            "kind": "IndexExpression",
+                            "span": {
+                              "start": 261,
+                              "end": 273
+                            },
+                            "children": [
+                              {
+                                "role": "expression",
+                                "node": {
+                                  "id": 39,
+                                  "kind": "Identifier",
+                                  "span": {
+                                    "start": 261,
+                                    "end": 270
+                                  },
+                                  "children": []
+                                }
+                              },
+                              {
+                                "role": "index",
+                                "node": {
+                                  "id": 40,
+                                  "kind": "Identifier",
+                                  "span": {
+                                    "start": 271,
+                                    "end": 273
+                                  },
+                                  "children": []
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "role": "statement",
+                    "node": {
+                      "id": 47,
+                      "kind": "ReturnStatement",
+                      "span": {
+                        "start": 280,
+                        "end": 304
+                      },
+                      "children": [
+                        {
+                          "role": "expression",
+                          "node": {
+                            "id": 46,
+                            "kind": "CallExpression",
+                            "span": {
+                              "start": 287,
+                              "end": 304
+                            },
+                            "children": [
+                              {
+                                "role": "callee",
+                                "node": {
+                                  "id": 43,
+                                  "kind": "Identifier",
+                                  "span": {
+                                    "start": 287,
+                                    "end": 293
+                                  },
+                                  "children": []
+                                }
+                              },
+                              {
+                                "role": "argument",
+                                "node": {
+                                  "id": 44,
+                                  "kind": "Identifier",
+                                  "span": {
+                                    "start": 294,
+                                    "end": 297
+                                  },
+                                  "children": []
+                                }
+                              },
+                              {
+                                "role": "argument",
+                                "node": {
+                                  "id": 45,
+                                  "kind": "Literal",
+                                  "span": {
+                                    "start": 299,
+                                    "end": 302
+                                  },
+                                  "children": []
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "role": "declaration",
+        "node": {
+          "id": 62,
+          "kind": "FunctionDeclaration",
+          "span": {
+            "start": 308,
+            "end": 368
+          },
+          "children": [
+            {
+              "role": "type",
+              "node": {
+                "id": 50,
+                "kind": "Type",
+                "span": {
+                  "start": 308,
+                  "end": 314
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "identifier",
+              "node": {
+                "id": 51,
+                "kind": "Identifier",
+                "span": {
+                  "start": 315,
+                  "end": 317
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "annotation",
+              "node": {
+                "id": 52,
+                "kind": "Annotation",
+                "span": {
+                  "start": 320,
+                  "end": 332
+                },
+                "children": [
+                  {
+                    "role": "token",
+                    "node": {
+                      "id": 53,
+                      "kind": "Token",
+                      "span": {
+                        "start": 322,
+                        "end": 332
+                      },
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "role": "body",
+              "node": {
+                "id": 61,
+                "kind": "Block",
+                "span": {
+                  "start": 333,
+                  "end": 368
+                },
+                "children": [
+                  {
+                    "role": "statement",
+                    "node": {
+                      "id": 60,
+                      "kind": "ReturnStatement",
+                      "span": {
+                        "start": 339,
+                        "end": 365
+                      },
+                      "children": [
+                        {
+                          "role": "expression",
+                          "node": {
+                            "id": 59,
+                            "kind": "IndexExpression",
+                            "span": {
+                              "start": 346,
+                              "end": 365
+                            },
+                            "children": [
+                              {
+                                "role": "expression",
+                                "node": {
+                                  "id": 54,
+                                  "kind": "Identifier",
+                                  "span": {
+                                    "start": 346,
+                                    "end": 352
+                                  },
+                                  "children": []
+                                }
+                              },
+                              {
+                                "role": "index",
+                                "node": {
+                                  "id": 58,
+                                  "kind": "CallExpression",
+                                  "span": {
+                                    "start": 353,
+                                    "end": 365
+                                  },
+                                  "children": [
+                                    {
+                                      "role": "callee",
+                                      "node": {
+                                        "id": 55,
+                                        "kind": "Identifier",
+                                        "span": {
+                                          "start": 353,
+                                          "end": 358
+                                        },
+                                        "children": []
+                                      }
+                                    },
+                                    {
+                                      "role": "argument",
+                                      "node": {
+                                        "id": 56,
+                                        "kind": "Literal",
+                                        "span": {
+                                          "start": 359,
+                                          "end": 360
+                                        },
+                                        "children": []
+                                      }
+                                    },
+                                    {
+                                      "role": "argument",
+                                      "node": {
+                                        "id": 57,
+                                        "kind": "Literal",
+                                        "span": {
+                                          "start": 362,
+                                          "end": 363
+                                        },
+                                        "children": []
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tokens": [
+    {
+      "kind": "KeywordCBuffer",
+      "text": "cbuffer",
+      "span": {
+        "start": 0,
+        "end": 7
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 7,
+            "end": 8
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "PerFrame",
+      "span": {
+        "start": 8,
+        "end": 16
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 16,
+            "end": 17
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "span": {
+        "start": 17,
+        "end": 18
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 18,
+            "end": 19
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "register",
+      "span": {
+        "start": 19,
+        "end": 27
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 27,
+        "end": 28
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "b0",
+      "span": {
+        "start": 28,
+        "end": 30
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 30,
+        "end": 31
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenBrace",
+      "text": "{",
+      "span": {
+        "start": 32,
+        "end": 33
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 31,
+            "end": 32
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordFloat4x4",
+      "text": "float4x4",
+      "span": {
+        "start": 38,
+        "end": 46
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 33,
+            "end": 34
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "    ",
+          "span": {
+            "start": 34,
+            "end": 38
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 46,
+            "end": 47
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "ViewProj",
+      "span": {
+        "start": 47,
+        "end": 55
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 55,
+        "end": 56
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseBrace",
+      "text": "}",
+      "span": {
+        "start": 57,
+        "end": 58
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 56,
+            "end": 57
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 58,
+        "end": 59
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordStructuredBuffer",
+      "text": "StructuredBuffer",
+      "span": {
+        "start": 61,
+        "end": 77
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 59,
+            "end": 60
+          }
+        },
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 60,
+            "end": 61
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Less",
+      "text": "\u003C",
+      "span": {
+        "start": 77,
+        "end": 78
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordFloat3",
+      "text": "float3",
+      "span": {
+        "start": 78,
+        "end": 84
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Greater",
+      "text": "\u003E",
+      "span": {
+        "start": 84,
+        "end": 85
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 85,
+            "end": 86
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "Positions",
+      "span": {
+        "start": 86,
+        "end": 95
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 95,
+            "end": 96
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "span": {
+        "start": 96,
+        "end": 97
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 97,
+            "end": 98
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "register",
+      "span": {
+        "start": 98,
+        "end": 106
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 106,
+        "end": 107
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "t0",
+      "span": {
+        "start": 107,
+        "end": 109
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 109,
+        "end": 110
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 110,
+        "end": 111
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordRWTexture2D",
+      "text": "RWTexture2D",
+      "span": {
+        "start": 112,
+        "end": 123
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 111,
+            "end": 112
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Less",
+      "text": "\u003C",
+      "span": {
+        "start": 123,
+        "end": 124
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordFloat4",
+      "text": "float4",
+      "span": {
+        "start": 124,
+        "end": 130
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Greater",
+      "text": "\u003E",
+      "span": {
+        "start": 130,
+        "end": 131
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 131,
+            "end": 132
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "Output",
+      "span": {
+        "start": 132,
+        "end": 138
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 138,
+            "end": 139
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "span": {
+        "start": 139,
+        "end": 140
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 140,
+            "end": 141
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "register",
+      "span": {
+        "start": 141,
+        "end": 149
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 149,
+        "end": 150
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "u0",
+      "span": {
+        "start": 150,
+        "end": 152
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 152,
+        "end": 153
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 153,
+        "end": 154
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordByteAddressBuffer",
+      "text": "ByteAddressBuffer",
+      "span": {
+        "start": 155,
+        "end": 172
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 154,
+            "end": 155
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 172,
+            "end": 173
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "Data",
+      "span": {
+        "start": 173,
+        "end": 177
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 177,
+            "end": 178
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "span": {
+        "start": 178,
+        "end": 179
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 179,
+            "end": 180
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "register",
+      "span": {
+        "start": 180,
+        "end": 188
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 188,
+        "end": 189
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "t1",
+      "span": {
+        "start": 189,
+        "end": 191
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 191,
+        "end": 192
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 192,
+        "end": 193
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordFloat4",
+      "text": "float4",
+      "span": {
+        "start": 195,
+        "end": 201
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 193,
+            "end": 194
+          }
+        },
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 194,
+            "end": 195
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 201,
+            "end": 202
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "VS",
+      "span": {
+        "start": 202,
+        "end": 204
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 204,
+        "end": 205
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordUInt",
+      "text": "uint",
+      "span": {
+        "start": 205,
+        "end": 209
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 209,
+            "end": 210
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "id",
+      "span": {
+        "start": 210,
+        "end": 212
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 212,
+            "end": 213
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "span": {
+        "start": 213,
+        "end": 214
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 214,
+            "end": 215
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "SV_VertexID",
+      "span": {
+        "start": 215,
+        "end": 226
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 226,
+        "end": 227
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 227,
+            "end": 228
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "span": {
+        "start": 228,
+        "end": 229
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 229,
+            "end": 230
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "SV_Position",
+      "span": {
+        "start": 230,
+        "end": 241
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenBrace",
+      "text": "{",
+      "span": {
+        "start": 242,
+        "end": 243
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 241,
+            "end": 242
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordFloat3",
+      "text": "float3",
+      "span": {
+        "start": 248,
+        "end": 254
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 243,
+            "end": 244
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "    ",
+          "span": {
+            "start": 244,
+            "end": 248
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 254,
+            "end": 255
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "pos",
+      "span": {
+        "start": 255,
+        "end": 258
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 258,
+            "end": 259
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Equals",
+      "text": "=",
+      "span": {
+        "start": 259,
+        "end": 260
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 260,
+            "end": 261
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "Positions",
+      "span": {
+        "start": 261,
+        "end": 270
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenBracket",
+      "text": "[",
+      "span": {
+        "start": 270,
+        "end": 271
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "id",
+      "span": {
+        "start": 271,
+        "end": 273
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseBracket",
+      "text": "]",
+      "span": {
+        "start": 273,
+        "end": 274
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 274,
+        "end": 275
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordReturn",
+      "text": "return",
+      "span": {
+        "start": 280,
+        "end": 286
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 275,
+            "end": 276
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "    ",
+          "span": {
+            "start": 276,
+            "end": 280
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 286,
+            "end": 287
+          }
+        }
+      ]
+    },
+    {
+      "kind": "KeywordFloat4",
+      "text": "float4",
+      "span": {
+        "start": 287,
+        "end": 293
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 293,
+        "end": 294
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "pos",
+      "span": {
+        "start": 294,
+        "end": 297
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "span": {
+        "start": 297,
+        "end": 298
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 298,
+            "end": 299
+          }
+        }
+      ]
+    },
+    {
+      "kind": "NumericLiteral",
+      "text": "1.0",
+      "span": {
+        "start": 299,
+        "end": 302
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 302,
+        "end": 303
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 303,
+        "end": 304
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseBrace",
+      "text": "}",
+      "span": {
+        "start": 305,
+        "end": 306
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 304,
+            "end": 305
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordFloat4",
+      "text": "float4",
+      "span": {
+        "start": 308,
+        "end": 314
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 306,
+            "end": 307
+          }
+        },
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 307,
+            "end": 308
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 314,
+            "end": 315
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "PS",
+      "span": {
+        "start": 315,
+        "end": 317
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 317,
+        "end": 318
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 318,
+        "end": 319
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 319,
+            "end": 320
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Colon",
+      "text": ":",
+      "span": {
+        "start": 320,
+        "end": 321
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 321,
+            "end": 322
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "SV_Target0",
+      "span": {
+        "start": 322,
+        "end": 332
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenBrace",
+      "text": "{",
+      "span": {
+        "start": 333,
+        "end": 334
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 332,
+            "end": 333
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordReturn",
+      "text": "return",
+      "span": {
+        "start": 339,
+        "end": 345
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 334,
+            "end": 335
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "    ",
+          "span": {
+            "start": 335,
+            "end": 339
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 345,
+            "end": 346
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "Output",
+      "span": {
+        "start": 346,
+        "end": 352
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenBracket",
+      "text": "[",
+      "span": {
+        "start": 352,
+        "end": 353
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "uint2",
+      "span": {
+        "start": 353,
+        "end": 358
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 358,
+        "end": 359
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "NumericLiteral",
+      "text": "0",
+      "span": {
+        "start": 359,
+        "end": 360
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "span": {
+        "start": 360,
+        "end": 361
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 361,
+            "end": 362
+          }
+        }
+      ]
+    },
+    {
+      "kind": "NumericLiteral",
+      "text": "0",
+      "span": {
+        "start": 362,
+        "end": 363
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 363,
+        "end": 364
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseBracket",
+      "text": "]",
+      "span": {
+        "start": 364,
+        "end": 365
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 365,
+        "end": 366
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseBrace",
+      "text": "}",
+      "span": {
+        "start": 367,
+        "end": 368
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 366,
+            "end": 367
+          }
+        }
+      ],
+      "trailingTrivia": []
+    }
+  ],
+  "diagnostics": []
+}

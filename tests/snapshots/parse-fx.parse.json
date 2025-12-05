@@ -1,0 +1,827 @@
+﻿{
+  "formatVersion": 1,
+  "source": {
+    "fileName": "parse-fx.hlsl",
+    "length": 170
+  },
+  "root": {
+    "id": 23,
+    "kind": "CompilationUnit",
+    "span": {
+      "start": 0,
+      "end": 170
+    },
+    "children": [
+      {
+        "role": "declaration",
+        "node": {
+          "id": 22,
+          "kind": "Technique10Declaration",
+          "span": {
+            "start": 0,
+            "end": 169
+          },
+          "children": [
+            {
+              "role": "identifier",
+              "node": {
+                "id": 1,
+                "kind": "Identifier",
+                "span": {
+                  "start": 12,
+                  "end": 18
+                },
+                "children": []
+              }
+            },
+            {
+              "role": "body",
+              "node": {
+                "id": 21,
+                "kind": "TechniqueBody",
+                "span": {
+                  "start": 19,
+                  "end": 169
+                },
+                "children": [
+                  {
+                    "role": "pass",
+                    "node": {
+                      "id": 20,
+                      "kind": "PassDeclaration",
+                      "span": {
+                        "start": 25,
+                        "end": 167
+                      },
+                      "children": [
+                        {
+                          "role": "identifier",
+                          "node": {
+                            "id": 2,
+                            "kind": "Identifier",
+                            "span": {
+                              "start": 30,
+                              "end": 32
+                            },
+                            "children": []
+                          }
+                        },
+                        {
+                          "role": "body",
+                          "node": {
+                            "id": 19,
+                            "kind": "Block",
+                            "span": {
+                              "start": 37,
+                              "end": 167
+                            },
+                            "children": [
+                              {
+                                "role": "statement",
+                                "node": {
+                                  "id": 10,
+                                  "kind": "ExpressionStatement",
+                                  "span": {
+                                    "start": 47,
+                                    "end": 100
+                                  },
+                                  "children": [
+                                    {
+                                      "role": "expression",
+                                      "node": {
+                                        "id": 9,
+                                        "kind": "CallExpression",
+                                        "span": {
+                                          "start": 47,
+                                          "end": 100
+                                        },
+                                        "children": [
+                                          {
+                                            "role": "callee",
+                                            "node": {
+                                              "id": 3,
+                                              "kind": "Identifier",
+                                              "span": {
+                                                "start": 47,
+                                                "end": 62
+                                              },
+                                              "children": []
+                                            }
+                                          },
+                                          {
+                                            "role": "argument",
+                                            "node": {
+                                              "id": 8,
+                                              "kind": "CallExpression",
+                                              "span": {
+                                                "start": 64,
+                                                "end": 99
+                                              },
+                                              "children": [
+                                                {
+                                                  "role": "callee",
+                                                  "node": {
+                                                    "id": 4,
+                                                    "kind": "Identifier",
+                                                    "span": {
+                                                      "start": 64,
+                                                      "end": 77
+                                                    },
+                                                    "children": []
+                                                  }
+                                                },
+                                                {
+                                                  "role": "argument",
+                                                  "node": {
+                                                    "id": 5,
+                                                    "kind": "Identifier",
+                                                    "span": {
+                                                      "start": 79,
+                                                      "end": 85
+                                                    },
+                                                    "children": []
+                                                  }
+                                                },
+                                                {
+                                                  "role": "argument",
+                                                  "node": {
+                                                    "id": 7,
+                                                    "kind": "CallExpression",
+                                                    "span": {
+                                                      "start": 87,
+                                                      "end": 97
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "role": "callee",
+                                                        "node": {
+                                                          "id": 6,
+                                                          "kind": "Identifier",
+                                                          "span": {
+                                                            "start": 87,
+                                                            "end": 93
+                                                          },
+                                                          "children": []
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "role": "statement",
+                                "node": {
+                                  "id": 18,
+                                  "kind": "ExpressionStatement",
+                                  "span": {
+                                    "start": 109,
+                                    "end": 161
+                                  },
+                                  "children": [
+                                    {
+                                      "role": "expression",
+                                      "node": {
+                                        "id": 17,
+                                        "kind": "CallExpression",
+                                        "span": {
+                                          "start": 109,
+                                          "end": 161
+                                        },
+                                        "children": [
+                                          {
+                                            "role": "callee",
+                                            "node": {
+                                              "id": 11,
+                                              "kind": "Identifier",
+                                              "span": {
+                                                "start": 109,
+                                                "end": 123
+                                              },
+                                              "children": []
+                                            }
+                                          },
+                                          {
+                                            "role": "argument",
+                                            "node": {
+                                              "id": 16,
+                                              "kind": "CallExpression",
+                                              "span": {
+                                                "start": 125,
+                                                "end": 160
+                                              },
+                                              "children": [
+                                                {
+                                                  "role": "callee",
+                                                  "node": {
+                                                    "id": 12,
+                                                    "kind": "Identifier",
+                                                    "span": {
+                                                      "start": 125,
+                                                      "end": 138
+                                                    },
+                                                    "children": []
+                                                  }
+                                                },
+                                                {
+                                                  "role": "argument",
+                                                  "node": {
+                                                    "id": 13,
+                                                    "kind": "Identifier",
+                                                    "span": {
+                                                      "start": 140,
+                                                      "end": 146
+                                                    },
+                                                    "children": []
+                                                  }
+                                                },
+                                                {
+                                                  "role": "argument",
+                                                  "node": {
+                                                    "id": 15,
+                                                    "kind": "CallExpression",
+                                                    "span": {
+                                                      "start": 148,
+                                                      "end": 158
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "role": "callee",
+                                                        "node": {
+                                                          "id": 14,
+                                                          "kind": "Identifier",
+                                                          "span": {
+                                                            "start": 148,
+                                                            "end": 154
+                                                          },
+                                                          "children": []
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tokens": [
+    {
+      "kind": "KeywordTechnique10",
+      "text": "technique10",
+      "span": {
+        "start": 0,
+        "end": 11
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 11,
+            "end": 12
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "Render",
+      "span": {
+        "start": 12,
+        "end": 18
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenBrace",
+      "text": "{",
+      "span": {
+        "start": 19,
+        "end": 20
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 18,
+            "end": 19
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "KeywordPass",
+      "text": "pass",
+      "span": {
+        "start": 25,
+        "end": 29
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 20,
+            "end": 21
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "    ",
+          "span": {
+            "start": 21,
+            "end": 25
+          }
+        }
+      ],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 29,
+            "end": 30
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "P0",
+      "span": {
+        "start": 30,
+        "end": 32
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenBrace",
+      "text": "{",
+      "span": {
+        "start": 37,
+        "end": 38
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 32,
+            "end": 33
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "    ",
+          "span": {
+            "start": 33,
+            "end": 37
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "SetVertexShader",
+      "span": {
+        "start": 47,
+        "end": 62
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 38,
+            "end": 39
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "        ",
+          "span": {
+            "start": 39,
+            "end": 47
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 62,
+        "end": 63
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 63,
+            "end": 64
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "CompileShader",
+      "span": {
+        "start": 64,
+        "end": 77
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 77,
+        "end": 78
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 78,
+            "end": 79
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "vs_4_0",
+      "span": {
+        "start": 79,
+        "end": 85
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "span": {
+        "start": 85,
+        "end": 86
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 86,
+            "end": 87
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "VSMain",
+      "span": {
+        "start": 87,
+        "end": 93
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 93,
+        "end": 94
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 94,
+        "end": 95
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 95,
+            "end": 96
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 96,
+        "end": 97
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 97,
+            "end": 98
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 98,
+        "end": 99
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 99,
+        "end": 100
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Identifier",
+      "text": "SetPixelShader",
+      "span": {
+        "start": 109,
+        "end": 123
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 100,
+            "end": 101
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "        ",
+          "span": {
+            "start": 101,
+            "end": 109
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 123,
+        "end": 124
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 124,
+            "end": 125
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "CompileShader",
+      "span": {
+        "start": 125,
+        "end": 138
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 138,
+        "end": 139
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 139,
+            "end": 140
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "ps_4_0",
+      "span": {
+        "start": 140,
+        "end": 146
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Comma",
+      "text": ",",
+      "span": {
+        "start": 146,
+        "end": 147
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 147,
+            "end": 148
+          }
+        }
+      ]
+    },
+    {
+      "kind": "Identifier",
+      "text": "PSMain",
+      "span": {
+        "start": 148,
+        "end": 154
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "OpenParen",
+      "text": "(",
+      "span": {
+        "start": 154,
+        "end": 155
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 155,
+        "end": 156
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 156,
+            "end": 157
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 157,
+        "end": 158
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": [
+        {
+          "kind": "Whitespace",
+          "text": " ",
+          "span": {
+            "start": 158,
+            "end": 159
+          }
+        }
+      ]
+    },
+    {
+      "kind": "CloseParen",
+      "text": ")",
+      "span": {
+        "start": 159,
+        "end": 160
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "Semicolon",
+      "text": ";",
+      "span": {
+        "start": 160,
+        "end": 161
+      },
+      "leadingTrivia": [],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseBrace",
+      "text": "}",
+      "span": {
+        "start": 166,
+        "end": 167
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 161,
+            "end": 162
+          }
+        },
+        {
+          "kind": "Whitespace",
+          "text": "    ",
+          "span": {
+            "start": 162,
+            "end": 166
+          }
+        }
+      ],
+      "trailingTrivia": []
+    },
+    {
+      "kind": "CloseBrace",
+      "text": "}",
+      "span": {
+        "start": 168,
+        "end": 169
+      },
+      "leadingTrivia": [
+        {
+          "kind": "NewLine",
+          "text": "\n",
+          "span": {
+            "start": 167,
+            "end": 168
+          }
+        }
+      ],
+      "trailingTrivia": []
+    }
+  ],
+  "diagnostics": []
+}

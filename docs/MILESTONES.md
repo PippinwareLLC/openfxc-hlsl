@@ -26,7 +26,7 @@
 - [x] **M6: FX Constructs Parsing**
   - Parse `technique`/`technique10`/`pass` blocks and `CompileShader`/`Set*Shader` forms as syntax-only.
   - Representative `.fx` parser snapshot.
-- [ ] **M7: Snapshots & Determinism**
+- [x] **M7: Snapshots & Determinism**
   - Era-based parser snapshot suite (SM1.x, SM2/SM3, SM4, SM5, FX) pinning AST/tokens/diagnostics.
   - Deterministic ordering and spans across runs.
 - [ ] **M8: Tooling & CI**
