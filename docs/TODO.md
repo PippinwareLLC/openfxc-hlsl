@@ -26,6 +26,18 @@
 - [ ] Parser: `technique`/`pass` blocks, `CompileShader(...)`, `SetPixelShader(...)` parsed as syntax without semantics.
 - [x] Tests: FX construct lex coverage and snapshot of a representative .fx file.
 
+## Parser Coverage (syntax-only)
+- [x] Always emit `CompilationUnit` with deterministic child order and spans.
+- [x] Types and declarations: scalars, vectors, matrices, resource templates, global variables with initializers.
+- [x] Functions and parameters: parameter lists with semantics/register annotations (syntax-only), return semantics; overloadable signatures pending.
+- [x] Expressions: precedence-aware unary/binary, calls, indexing, member access; assignment partially covered.
+- [x] Statements: blocks, if/else, for/while/do-while, return, break/continue, discard.
+- [x] Semantics and registers: `: SEMANTIC`, `: register(...)` captured as annotations (syntax-only).
+- [x] Legacy sampler/texture syntax (SM1-SM3): sampler declarations and sampler_state blocks.
+- [x] SM4/SM5 constructs: `cbuffer`/`tbuffer` blocks (syntax-only bodies) and resource declarations.
+- [x] FX framework constructs: `technique`, `technique10`, `pass`, `CompileShader(...)`, `SetPixelShader(...)` parsed as syntax.
+- [x] Error recovery: diagnostics with stable IDs for missing semicolon, missing brace, unexpected token; continue producing well-formed trees.
+
 ## Error Recovery (all eras)
 - [x] Diagnostics with stable IDs for missing semicolon, missing brace, unexpected token; recovery keeps `CompilationUnit` well-formed.
 - [x] Tests: targeted negative cases for missing semicolon/braces; expand per era as parser grows.

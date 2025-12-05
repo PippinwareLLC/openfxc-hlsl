@@ -2,7 +2,7 @@
 The open HLSL lexer / parser for SM1 - SM5 (syntax-only front-end).
 
 # Origin
-This project was created by peeling off the commits from Pippinware LLCs' in-progress OpenFXC private project
+This project was created by peeling off the commits from Pippinware LLCs' in-progress OpenFXC (currently private) project
 
 ## Aim of the Project
 - Provide a deterministic, syntax-only HLSL front-end matching FXC-era SM1-SM5 acceptance.

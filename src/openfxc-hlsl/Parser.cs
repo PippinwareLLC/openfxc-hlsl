@@ -1,4 +1,5 @@
 using System.Text;
+using System.Linq;
 
 namespace OpenFXC.Hlsl;
 
@@ -60,8 +61,20 @@ internal sealed class Parser
             return null;
         }
 
+        // CBuffer/TBuffer blocks
+        if (startToken.Kind is "KeywordCBuffer" or "KeywordTBuffer")
+        {
+            return ParseCBuffer();
+        }
+
+        // Sampler state blocks
+        if (startToken.Kind == "KeywordSamplerState")
+        {
+            return ParseSamplerState();
+        }
+
         // Heuristic: type identifier ... if followed by "(" treat as function, else variable.
-        if (IsTypeLike(startToken) && Peek(1) is { Kind: "Identifier" })
+        if (IsTypeLike(startToken) && (Peek(1)?.Kind == "Identifier" || Peek(1)?.Kind == "Less"))
         {
             if (Peek(2) is { Kind: "OpenParen" })
             {
@@ -87,13 +100,8 @@ internal sealed class Parser
         var name = Consume(); // identifier
         children.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", name) });
 
-        ConsumeExpected("OpenParen");
-        // Parameters: consume until ')'
-        while (!IsEnd && Current!.Kind != "CloseParen")
-        {
-            Consume();
-        }
-        ConsumeExpected("CloseParen");
+        var parameters = ParseParameterList();
+        children.AddRange(parameters.Select(p => new AstChild { Role = "parameter", Node = p }));
 
         // Optional return semantics colon IDENT
         if (Match("Colon"))
@@ -143,8 +151,27 @@ internal sealed class Parser
         var typeTok = Consume();
         children.Add(new AstChild { Role = "type", Node = Leaf("Type", typeTok) });
 
-        var identTok = Consume();
+        Token identTok;
+        if (Match("Less"))
+        {
+            ConsumeTemplateArguments();
+        }
+
+        if (Match("Identifier"))
+        {
+            identTok = Consume();
+        }
+        else
+        {
+            identTok = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+            AddDiagnostic("HLSL1001", "Expected identifier in declaration.", CurrentSpan());
+        }
         children.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", identTok) });
+
+        foreach (var annotation in ParseAnnotations(new[] { "Semicolon", "Equals" }))
+        {
+            children.Add(annotation);
+        }
 
         // Optional initializer: = expression
         if (Match("Equals"))
@@ -271,7 +298,7 @@ internal sealed class Parser
         }
 
         // Local variable declaration heuristic inside blocks: type Identifier ...
-        if (IsTypeLike(Current!) && Peek(1) is { Kind: "Identifier" } && Peek(2)?.Kind != "OpenParen")
+        if (IsTypeLike(Current!) && (Peek(1)?.Kind == "Identifier" || Peek(1)?.Kind == "Less") && Peek(2)?.Kind != "OpenParen")
         {
             return ParseVariableDeclaration();
         }
@@ -445,6 +472,206 @@ internal sealed class Parser
             Span = span,
             Children = expr is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "expression", Node = expr } }
         };
+    }
+
+    private AstNode[] ParseParameterList()
+    {
+        var parameters = new List<AstNode>();
+        ConsumeExpected("OpenParen");
+        while (!IsEnd && !Match("CloseParen"))
+        {
+            if (IsTypeLike(Current!))
+            {
+                var typeTok = Consume();
+                if (Match("Less"))
+                {
+                    ConsumeTemplateArguments();
+                }
+
+                var identTok = Match("Identifier")
+                    ? Consume()
+                    : new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+                var children = new List<AstChild>
+                {
+                    new AstChild { Role = "type", Node = Leaf("Type", typeTok) },
+                    new AstChild { Role = "identifier", Node = Leaf("Identifier", identTok) }
+                };
+
+                children.AddRange(ParseAnnotations(new[] { "Comma", "CloseParen" }));
+
+                parameters.Add(new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "Parameter",
+                    Span = new Span { Start = typeTok.Span.Start, End = children.Last().Node.Span.End },
+                    Children = children.ToArray()
+                });
+            }
+            else
+            {
+                // recovery: consume token
+                _position++;
+            }
+
+            if (Match("Comma"))
+            {
+                Consume();
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        ConsumeExpected("CloseParen");
+        return parameters.ToArray();
+    }
+
+    private IEnumerable<AstChild> ParseAnnotations(IEnumerable<string> terminators)
+    {
+        var termSet = new HashSet<string>(terminators);
+        var annotations = new List<AstChild>();
+        while (!IsEnd && Match("Colon"))
+        {
+            var colon = Consume();
+            if (Current is null || termSet.Contains(Current.Kind))
+            {
+                break;
+            }
+
+            var start = colon.Span.Start;
+            var tokens = new List<Token>();
+            while (!IsEnd && !termSet.Contains(Current!.Kind) && Current!.Kind != "Comma" && Current!.Kind != "Equals" && Current!.Kind != "OpenBrace")
+            {
+                tokens.Add(Consume());
+            }
+
+            var end = tokens.Count > 0 ? tokens.Last().Span.End : colon.Span.End;
+            annotations.Add(new AstChild
+            {
+                Role = "annotation",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "Annotation",
+                    Span = new Span { Start = start, End = end },
+                    Children = tokens.Select(t => new AstChild { Role = "token", Node = Leaf("Token", t) }).ToArray()
+                }
+            });
+        }
+
+        return annotations;
+    }
+
+    private AstNode ParseSamplerState()
+    {
+        var start = Consume().Span.Start; // sampler_state
+        var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
+        var children = new List<AstChild>
+        {
+            new AstChild { Role = "identifier", Node = Leaf("Identifier", name) }
+        };
+
+        if (Match("OpenBrace"))
+        {
+            var blockSpan = ConsumeBlockSpan();
+            children.Add(new AstChild
+            {
+                Role = "body",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "SamplerStateBody",
+                    Span = blockSpan,
+                    Children = Array.Empty<AstChild>()
+                }
+            });
+        }
+        ConsumeExpected("Semicolon");
+
+        var end = children.Last().Node.Span.End;
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "SamplerStateDeclaration",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
+    private AstNode ParseCBuffer()
+    {
+        var start = Consume().Span.Start; // cbuffer/tbuffer
+        var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
+        var children = new List<AstChild>
+        {
+            new AstChild { Role = "identifier", Node = Leaf("Identifier", name) }
+        };
+
+        if (Match("Colon"))
+        {
+            Consume(); // :
+            while (!IsEnd && !Match("OpenBrace"))
+            {
+                Consume();
+            }
+        }
+
+        if (Match("OpenBrace"))
+        {
+            var span = ConsumeBlockSpan();
+            children.Add(new AstChild
+            {
+                Role = "body",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "BufferBody",
+                    Span = span,
+                    Children = Array.Empty<AstChild>()
+                }
+            });
+            ConsumeExpected("Semicolon");
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = "BufferDeclaration",
+                Span = new Span { Start = start, End = span.End },
+                Children = children.ToArray()
+            };
+        }
+        else
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' to start buffer body.", CurrentSpan());
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = "BufferDeclaration",
+                Span = CurrentSpan(),
+                Children = children.ToArray()
+            };
+        }
+    }
+
+    private Span ConsumeBlockSpan()
+    {
+        var startTok = ConsumeExpected("OpenBrace");
+        var depth = 1;
+        var end = startTok.Span.End;
+        while (!IsEnd && depth > 0)
+        {
+            if (Match("OpenBrace"))
+            {
+                depth++;
+            }
+            else if (Match("CloseBrace"))
+            {
+                depth--;
+            }
+            end = CurrentSpan().End;
+            Consume();
+        }
+        return new Span { Start = startTok.Span.Start, End = end };
     }
 
     private AstNode? ParseExpression(int precedence = 0)
@@ -643,22 +870,6 @@ internal sealed class Parser
         Right
     }
 
-    private static int GetPrecedence(string kind) => kind switch
-    {
-        "Equals" => 1,
-        "PipePipe" => 2,
-        "AmpersandAmpersand" => 3,
-        "Pipe" => 4,
-        "Caret" => 5,
-        "Ampersand" => 6,
-        "EqualsEquals" or "BangEquals" => 7,
-        "Less" or "LessEquals" or "Greater" or "GreaterEquals" => 8,
-        "LessLess" or "GreaterGreater" => 9,
-        "Plus" or "Minus" => 10,
-        "Star" or "Slash" or "Percent" => 11,
-        _ => -1
-    };
-
     private bool IsTypeLike(Token token) =>
         token.Kind.StartsWith("Keyword", StringComparison.Ordinal) || token.Kind == "Identifier";
 
@@ -731,5 +942,49 @@ internal sealed class Parser
             Message = message,
             Span = span
         });
+    }
+
+    private static int GetPrecedence(string kind) => kind switch
+    {
+        "Equals" => 1,
+        "PipePipe" => 2,
+        "AmpersandAmpersand" => 3,
+        "Pipe" => 4,
+        "Caret" => 5,
+        "Ampersand" => 6,
+        "EqualsEquals" or "BangEquals" => 7,
+        "Less" or "LessEquals" or "Greater" or "GreaterEquals" => 8,
+        "LessLess" or "GreaterGreater" => 9,
+        "Plus" or "Minus" => 10,
+        "Star" or "Slash" or "Percent" => 11,
+        _ => -1
+    };
+
+    private void ConsumeTemplateArguments()
+    {
+        if (!Match("Less"))
+        {
+            return;
+        }
+
+        var depth = 0;
+        while (!IsEnd)
+        {
+            if (Match("Less"))
+            {
+                depth++;
+            }
+            else if (Match("Greater"))
+            {
+                depth--;
+                Consume();
+                if (depth <= 0)
+                {
+                    break;
+                }
+                continue;
+            }
+            Consume();
+        }
     }
 }

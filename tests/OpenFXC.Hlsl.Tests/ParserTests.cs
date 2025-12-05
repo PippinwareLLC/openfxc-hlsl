@@ -60,4 +60,29 @@ public class ParserTests
         Assert.Equal("CompilationUnit", root.Kind);
         Assert.True(root.Children.Length > 0);
     }
+
+    [Fact]
+    public void ParseSamplerStateAndSampler()
+    {
+        var path = Path.Combine(RepoRoot, "tests", "fixtures", "sm1-sampler.hlsl");
+        var text = File.ReadAllText(path);
+        var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
+        var (root, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+
+        Assert.Empty(lexDiagnostics);
+        Assert.Empty(parseDiagnostics);
+        Assert.Equal("CompilationUnit", root.Kind);
+    }
+
+    [Fact]
+    public void ParseCBuffer()
+    {
+        var path = Path.Combine(RepoRoot, "tests", "fixtures", "sm4-snapshot.hlsl");
+        var text = File.ReadAllText(path);
+        var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
+        var (_, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+
+        Assert.Empty(lexDiagnostics);
+        Assert.Empty(parseDiagnostics);
+    }
 }
