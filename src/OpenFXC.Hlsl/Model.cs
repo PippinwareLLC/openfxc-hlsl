@@ -2,11 +2,11 @@ using System.Text.Json.Serialization;
 
 namespace OpenFXC.Hlsl;
 
-internal sealed record SourceInfo(
+public sealed record SourceInfo(
     [property: JsonPropertyName("fileName")] string FileName,
     [property: JsonPropertyName("length")] int Length);
 
-internal sealed record Span
+public sealed record Span
 {
     [JsonPropertyName("start")]
     public int Start { get; init; }
@@ -15,7 +15,7 @@ internal sealed record Span
     public int End { get; init; }
 }
 
-internal sealed record Trivia
+public sealed record Trivia
 {
     [JsonPropertyName("kind")]
     public string Kind { get; init; } = string.Empty;
@@ -27,7 +27,7 @@ internal sealed record Trivia
     public Span Span { get; init; } = new();
 }
 
-internal sealed record Token
+public sealed record Token
 {
     [JsonPropertyName("kind")]
     public string Kind { get; init; } = string.Empty;
@@ -45,7 +45,7 @@ internal sealed record Token
     public Trivia[] TrailingTrivia { get; init; } = Array.Empty<Trivia>();
 }
 
-internal sealed record Diagnostic
+public sealed record Diagnostic
 {
     [JsonPropertyName("id")]
     public string Id { get; init; } = string.Empty;
@@ -57,13 +57,13 @@ internal sealed record Diagnostic
     public Span Span { get; init; } = new();
 }
 
-internal sealed record LexResult(
+public sealed record LexResult(
     [property: JsonPropertyName("formatVersion")] int FormatVersion,
     [property: JsonPropertyName("source")] SourceInfo Source,
     [property: JsonPropertyName("tokens")] Token[] Tokens,
     [property: JsonPropertyName("diagnostics")] Diagnostic[] Diagnostics);
 
-internal sealed record AstChild
+public sealed record AstChild
 {
     [JsonPropertyName("role")]
     public string Role { get; init; } = string.Empty;
@@ -72,7 +72,7 @@ internal sealed record AstChild
     public AstNode Node { get; init; } = new();
 }
 
-internal sealed record AstNode
+public sealed record AstNode
 {
     [JsonPropertyName("id")]
     public int Id { get; init; }
@@ -87,7 +87,7 @@ internal sealed record AstNode
     public AstChild[] Children { get; init; } = Array.Empty<AstChild>();
 }
 
-internal sealed record ParseResult(
+public sealed record ParseResult(
     [property: JsonPropertyName("formatVersion")] int FormatVersion,
     [property: JsonPropertyName("source")] SourceInfo Source,
     [property: JsonPropertyName("root")] AstNode Root,

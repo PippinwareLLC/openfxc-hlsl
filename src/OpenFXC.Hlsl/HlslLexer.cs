@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace OpenFXC.Hlsl;
 
-internal static class HlslLexer
+public static class HlslLexer
 {
     private static readonly Dictionary<string, string> Keywords = new(StringComparer.Ordinal)
     {
@@ -81,7 +81,7 @@ internal static class HlslLexer
     private const string DiagnosticUnterminatedComment = "HLSL0002";
     private const string DiagnosticUnterminatedString = "HLSL0003";
 
-    internal static (Token[] Tokens, Diagnostic[] Diagnostics) Lex(string text)
+    public static (Token[] Tokens, Diagnostic[] Diagnostics) Lex(string text)
     {
         var tokens = new List<Token>();
         var diagnostics = new List<Diagnostic>();

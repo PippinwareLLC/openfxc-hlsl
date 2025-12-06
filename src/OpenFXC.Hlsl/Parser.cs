@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace OpenFXC.Hlsl;
 
-internal sealed class Parser
+public sealed class Parser
 {
     private readonly Token[] _tokens;
     private readonly int _length;

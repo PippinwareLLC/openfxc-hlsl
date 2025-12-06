@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\openfxc-hlsl\openfxc-hlsl.csproj" />
+    <ProjectReference Include="..\..\src\OpenFXC.Hlsl\OpenFXC.Hlsl.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />

@@ -39,6 +39,18 @@ From the repo root, publish self-contained, single-file executables:
 
 Artifacts land under `src/openfxc-hlsl/bin/Release/net8.0/<rid>/publish/`. Add `-p:PublishTrimmed=true` if you want smaller binaries (verify before distributing).
 
+## Library usage
+
+- Core library: `src/OpenFXC.Hlsl/OpenFXC.Hlsl.csproj` (produces `OpenFXC.Hlsl.dll`).
+- CLI wrapper: `src/openfxc-hlsl/openfxc-hlsl.csproj` references the library; use it for `lex`/`parse` commands.
+- Example (C#):
+  ```csharp
+  var text = File.ReadAllText("shader.hlsl");
+  var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
+  var (root, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+  ```
+- Reference the project directly or the built DLL to consume the lexer/parser from other tools.
+
 ## Docs
 - Behavioral contract: `docs/TDD.md`
 - Work queue: `docs/TODO.md`
