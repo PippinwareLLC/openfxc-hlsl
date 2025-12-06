@@ -21,6 +21,24 @@ Current output includes full lexing for SM1–SM5 and FX constructs; parsing now
 - Snapshot coverage: lex + parse snapshots pinned per era (SM1, SM2/3, SM4, SM5) plus FX technique/pass to keep output deterministic.
 - Quick all-in-one: `tests/run-all.cmd` (Windows) or `tests/run-all.sh` (bash) to execute the full suite.
 
+## Build (single-file binaries)
+
+From the repo root, publish self-contained, single-file executables:
+
+- Windows (x64):\
+  `dotnet publish src/openfxc-hlsl/openfxc-hlsl.csproj -c Release -r win-x64 -p:PublishSingleFile=true -p:SelfContained=true`
+
+- Linux (x64):\
+  `dotnet publish src/openfxc-hlsl/openfxc-hlsl.csproj -c Release -r linux-x64 -p:PublishSingleFile=true -p:SelfContained=true`
+
+- macOS Intel:\
+  `dotnet publish src/openfxc-hlsl/openfxc-hlsl.csproj -c Release -r osx-x64 -p:PublishSingleFile=true -p:SelfContained=true`
+
+- macOS Apple Silicon:\
+  `dotnet publish src/openfxc-hlsl/openfxc-hlsl.csproj -c Release -r osx-arm64 -p:PublishSingleFile=true -p:SelfContained=true`
+
+Artifacts land under `src/openfxc-hlsl/bin/Release/net8.0/<rid>/publish/`. Add `-p:PublishTrimmed=true` if you want smaller binaries (verify before distributing).
+
 ## Docs
 - Behavioral contract: `docs/TDD.md`
 - Work queue: `docs/TODO.md`
