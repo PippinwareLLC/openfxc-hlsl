@@ -384,7 +384,7 @@ Add **integration test shaders** for representative eras:
 
 ### FX Framework .fx files
 
-* Techniques, passes, CompileShader
+* Techniques, passes, CompileShader/compile_fragment, brace initializer expressions in pass/state assignments
 
 Each must produce a tree and no internal parser failures.
 

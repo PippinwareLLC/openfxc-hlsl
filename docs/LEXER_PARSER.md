@@ -11,7 +11,7 @@ This document summarizes how the HLSL front-end is structured so contributors ca
 ## Lexer Notes
 - Stateless pass over UTF-16 text; spans are byte-offset-free and satisfy `0 <= start <= end <= length`.
 - Trivia: leading/trailing whitespace/newlines/comments are preserved on tokens; preprocessor lines are emitted as `PreprocessorDirective` with trailing text kept in trivia.
-- Keywords vs identifiers: era-specific keywords (sampler/texture/class/interface/technique/technique10/pass/CompileShader/Set*Shader, resource types) are recognized; semantics/register forms (`POSITION0`, `TEXCOORD*`, `register`) remain identifiers for syntax-only handling.
+- Keywords vs identifiers: era-specific keywords (sampler/texture/class/interface/technique/technique10/technique11/pass/CompileShader/compile_fragment/Set*Shader, resource types) are recognized case-insensitively; mixed-case tokens that would be keywords (e.g., `Sampler`, `Half`) are preserved as identifiers for FXC compatibility; semantics/register forms (`POSITION0`, `TEXCOORD*`, `register`) remain identifiers for syntax-only handling.
 - Numeric literals: decimal/hex/float forms are tokenized; diagnostics include `HLSL0001` (unexpected character) and `HLSL0002` (unterminated block comment).
 - Determinism: token order and spans are stable; no macro expansion or semantic filtering is performed.
 
@@ -21,7 +21,7 @@ This document summarizes how the HLSL front-end is structured so contributors ca
   - Struct/class/interface bodies parse member variable declarations and signature-only methods; typedef supports aliasing types and struct-like inline bodies.
   - Resource blocks: `cbuffer`/`tbuffer` bodies are consumed as spans; `sampler_state` is parsed as a body with a terminating semicolon.
   - Annotations/semantics: colon-prefixed tokens are collected as `Annotation` children (semantics, register(...), packoffset, etc.) until a terminator (`;`, `=`, `,`, `{`).
-  - FX constructs: `technique`/`technique10` with nested `pass` blocks parsed as syntax-only bodies; `CompileShader`/`Set*Shader` remain call expressions.
+  - FX constructs: `technique`/`technique10`/`technique11` with nested `pass` blocks parsed as syntax-only bodies; `CompileShader`/`compile_fragment`/`Set*Shader` remain call expressions; FX property assignments accept brace initializer expressions (`MaterialAmbient = {1,1,1,1};`).
 - Expressions and statements:
   - Precedence-aware unary/binary parsing; postfix handles member, call, and index expressions.
   - Statements cover blocks, if/else, loops (for/while/do), return, break/continue, discard, and expression statements.
