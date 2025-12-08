@@ -9,6 +9,9 @@ public sealed record PreprocessorOptions
     public string? FilePath { get; init; }
 
     public IReadOnlyList<string> IncludeDirectories { get; init; } = Array.Empty<string>();
+
+    public IReadOnlyDictionary<string, string?> Defines { get; init; } =
+        new Dictionary<string, string?>(StringComparer.Ordinal);
 }
 
 public sealed record PreprocessResult(string Text, Diagnostic[] Diagnostics);
@@ -48,6 +51,18 @@ public static class Preprocessor
         public PreprocessorContext(PreprocessorOptions options)
         {
             _options = options;
+            if (options.Defines is not null)
+            {
+                foreach (var kvp in options.Defines)
+                {
+                    if (string.IsNullOrWhiteSpace(kvp.Key))
+                    {
+                        continue;
+                    }
+
+                    _macros[kvp.Key] = new MacroDefinition(kvp.Key, Array.Empty<string>(), kvp.Value ?? string.Empty);
+                }
+            }
         }
 
         public IReadOnlyList<Diagnostic> Diagnostics => _diagnostics;

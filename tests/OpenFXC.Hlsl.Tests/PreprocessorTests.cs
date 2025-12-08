@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using OpenFXC.Hlsl;
 using Xunit;
 
@@ -47,5 +48,23 @@ public class PreprocessorTests
         var result = Preprocessor.Preprocess(text, new PreprocessorOptions());
 
         Assert.Contains("float x = LOOP;", result.Text);
+    }
+
+    [Fact]
+    public void SeededDefinesExpandFromOptions()
+    {
+        var text = "float value = FOO;";
+        var result = Preprocessor.Preprocess(
+            text,
+            new PreprocessorOptions
+            {
+                Defines = new Dictionary<string, string?>(StringComparer.Ordinal)
+                {
+                    ["FOO"] = "42"
+                }
+            });
+
+        Assert.Contains("float value = 42;", result.Text);
+        Assert.DoesNotContain("FOO", result.Text);
     }
 }

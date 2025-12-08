@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using Xunit;
 
@@ -35,7 +37,30 @@ public class CliTests
         Assert.True(root.GetProperty("tokens").GetArrayLength() > 0);
     }
 
-    private static string RunCli(string command, string inputPath)
+    [Fact]
+    public void LexCommandHonorsDefines()
+    {
+        var tempPath = Path.Combine(Path.GetTempPath(), $"cli-define-{Guid.NewGuid():N}.hlsl");
+        File.WriteAllText(tempPath, "float x = FOO;");
+
+        try
+        {
+            var json = RunCli("lex", tempPath, "-D FOO=7");
+            using var doc = JsonDocument.Parse(json);
+            var tokens = doc.RootElement.GetProperty("tokens").EnumerateArray().ToList();
+            Assert.DoesNotContain(tokens, t => string.Equals(t.GetProperty("text").GetString(), "FOO", StringComparison.Ordinal));
+            Assert.Contains(tokens, t => string.Equals(t.GetProperty("text").GetString(), "7", StringComparison.Ordinal));
+        }
+        finally
+        {
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+        }
+    }
+
+    private static string RunCli(string command, string inputPath, string extraArgs = "")
     {
         if (!File.Exists(ExePath))
         {
@@ -45,7 +70,7 @@ public class CliTests
         var psi = new ProcessStartInfo
         {
             FileName = ExePath,
-            Arguments = $"{command} -i \"{inputPath}\"",
+            Arguments = $"{command} -i \"{inputPath}\" {extraArgs}".Trim(),
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,

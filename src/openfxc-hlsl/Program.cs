@@ -33,10 +33,22 @@ internal sealed class Program
                 }
             }
 
+            var defineMap = new Dictionary<string, string?>(StringComparer.Ordinal);
+            foreach (var def in options.Defines)
+            {
+                if (string.IsNullOrWhiteSpace(def.Name))
+                {
+                    continue;
+                }
+
+                defineMap[def.Name] = def.Value;
+            }
+
             var preOptions = new PreprocessorOptions
             {
                 FilePath = options.InputPath,
-                IncludeDirectories = includeDirs
+                IncludeDirectories = includeDirs,
+                Defines = defineMap
             };
 
             var preprocessed = Preprocessor.Preprocess(input, preOptions);
@@ -67,7 +79,7 @@ internal sealed class Program
 
     private static void PrintUsage()
     {
-        Console.WriteLine("openfxc-hlsl <lex|parse> [-i <file>] [-o <file>] [-I <dir>]");
+        Console.WriteLine("openfxc-hlsl <lex|parse> [-i <file>] [-o <file>] [-I <dir>] [-D NAME[=VALUE]]");
         Console.WriteLine("Reads HLSL from -i or stdin, runs a lightweight preprocessor, and emits JSON to -o or stdout.");
     }
 
@@ -76,10 +88,12 @@ internal sealed class Program
         string? input = null;
         string? output = null;
         var includeDirs = new List<string>();
+        var defines = new List<(string Name, string? Value)>();
 
         for (var i = 0; i < args.Length; i++)
         {
-            switch (args[i])
+            var arg = args[i];
+            switch (arg)
             {
                 case "-i":
                 case "--input":
@@ -97,12 +111,22 @@ internal sealed class Program
                 case "--include":
                     includeDirs.Add(RequireNext(args, ref i, "include directory"));
                     break;
+                case "-D":
+                case "--define":
+                    defines.Add(ParseDefine(RequireNext(args, ref i, "macro definition")));
+                    break;
                 default:
-                    throw new InvalidOperationException($"Unknown argument '{args[i]}'.");
+                    if (arg.StartsWith("-D") && arg.Length > 2)
+                    {
+                        defines.Add(ParseDefine(arg[2..]));
+                        break;
+                    }
+
+                    throw new InvalidOperationException($"Unknown argument '{arg}'.");
             }
         }
 
-        return new CliOptions(input, output, includeDirs.ToArray());
+        return new CliOptions(input, output, includeDirs.ToArray(), defines.ToArray());
     }
 
     private static string RequireNext(string[] args, ref int index, string name)
@@ -138,6 +162,20 @@ internal sealed class Program
         File.WriteAllText(path, content, Encoding.UTF8);
     }
 
+    private static (string Name, string? Value) ParseDefine(string value)
+    {
+        var trimmed = value ?? string.Empty;
+        var eq = trimmed.IndexOf('=');
+        if (eq < 0)
+        {
+            return (trimmed, null);
+        }
+
+        var name = trimmed[..eq];
+        var val = trimmed[(eq + 1)..];
+        return (name, val);
+    }
+
     private static string Serialize<T>(T value)
     {
         var options = new JsonSerializerOptions
@@ -162,5 +200,5 @@ internal sealed class Program
             allDiagnostics);
     }
 
-    private record CliOptions(string? InputPath, string? OutputPath, IReadOnlyList<string> IncludeDirectories);
+    private record CliOptions(string? InputPath, string? OutputPath, IReadOnlyList<string> IncludeDirectories, IReadOnlyList<(string Name, string? Value)> Defines);
 }

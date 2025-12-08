@@ -14,6 +14,7 @@ This project was created by peeling off the commits from Pippinware LLCs' in-pro
 2. Lex: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe lex -i path/to/file.hlsl`
 3. Parse: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe parse -i path/to/file.hlsl`
 4. Preprocessor: runs automatically for `lex`/`parse` to expand `#define`/`#include`/`#if`; add include search paths with `-I <dir>` (quoted includes search the source file's folder first).
+5. Command-line defines: use `-D NAME` or `-D NAME=VALUE` (repeatable) to seed macros before preprocessing.
 
 Current output includes full lexing for SM1-SM5 and FX constructs; parsing now covers era-specific declarations (samplers/sampler_state, semantics/register/bindings, cbuffer/tbuffer, class/interface/struct bodies, typedefs) and FX technique/pass bodies (syntax-only) with a `CompilationUnit` AST and diagnostics. Schema matches `docs/TDD.md`.
 
