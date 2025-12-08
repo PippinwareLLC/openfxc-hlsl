@@ -2041,19 +2041,49 @@ public sealed class Parser
 
     private bool LooksLikeCast()
     {
-        var next = Peek(1);
-        var nextNext = Peek(2);
-        var after = Peek(3);
-        if (next is null || nextNext?.Kind != "CloseParen")
+        var typeTok = Peek(1);
+        if (typeTok is null || !IsTypeLike(typeTok))
         {
             return false;
         }
 
-        if (!IsTypeLike(next))
+        var index = 2;
+        while (true)
         {
+            var tok = Peek(index);
+            if (tok is null)
+            {
+                return false;
+            }
+
+            if (tok.Kind == "OpenBracket")
+            {
+                // Skip ahead to the matching close bracket (simple heuristic: advance until one is found).
+                index++;
+                while (Peek(index) is not null && Peek(index)!.Kind != "CloseBracket")
+                {
+                    index++;
+                }
+
+                if (Peek(index)?.Kind != "CloseBracket")
+                {
+                    return false;
+                }
+
+                index++; // past ]
+                continue;
+            }
+
+            if (tok.Kind == "CloseParen")
+            {
+                index++;
+                break;
+            }
+
             return false;
         }
 
+        var after = Peek(index);
         if (after is null)
         {
             return false;
