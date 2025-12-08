@@ -1452,6 +1452,92 @@ public sealed class Parser
         return new Span { Start = startTok.Span.Start, End = end };
     }
 
+    private AstNode ParseAngleExpression()
+    {
+        var startTok = ConsumeExpected("Less");
+        var children = new List<AstChild>();
+        var depth = 1;
+        var end = startTok.Span.End;
+
+        while (!IsEnd && depth > 0)
+        {
+            var tok = Current!;
+            if (tok.Kind == "Less")
+            {
+                depth++;
+                var nested = ConsumeAngleBlockSpan();
+                children.Add(new AstChild
+                {
+                    Role = "annotation",
+                    Node = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "Annotation",
+                        Span = nested,
+                        Children = Array.Empty<AstChild>()
+                    }
+                });
+                end = nested.End;
+                continue;
+            }
+
+            if (tok.Kind == "Greater")
+            {
+                depth--;
+                end = tok.Span.End;
+                Consume();
+                continue;
+            }
+
+            if (tok.Kind == "Semicolon")
+            {
+                // statement separator inside annotation block
+                Consume();
+                continue;
+            }
+
+            if (tok.Kind == "Identifier")
+            {
+                var ident = Consume();
+                AstNode? expr = null;
+                if (Match("Equals"))
+                {
+                    Consume();
+                    expr = ParseExpression();
+                }
+
+                var annNode = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "AnnotationEntry",
+                    Span = new Span { Start = ident.Span.Start, End = expr?.Span.End ?? ident.Span.End },
+                    Children = expr is null
+                        ? new[] { new AstChild { Role = "identifier", Node = Leaf("Identifier", ident) } }
+                        : new[]
+                        {
+                            new AstChild { Role = "identifier", Node = Leaf("Identifier", ident) },
+                            new AstChild { Role = "value", Node = expr }
+                        }
+                };
+                children.Add(new AstChild { Role = "entry", Node = annNode });
+                end = annNode.Span.End;
+                continue;
+            }
+
+            // Fallback: consume token to avoid infinite loop.
+            end = tok.Span.End;
+            Consume();
+        }
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "AngleExpression",
+            Span = new Span { Start = startTok.Span.Start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
     private AstNode ParseStructBody()
     {
         var start = ConsumeExpected("OpenBrace").Span.Start;
@@ -1706,14 +1792,7 @@ public sealed class Parser
                 Consume();
                 return Leaf("StringLiteral", tok);
             case "Less":
-                var angleSpan = ConsumeAngleBlockSpan();
-                return new AstNode
-                {
-                    Id = NextId(),
-                    Kind = "AngleExpression",
-                    Span = angleSpan,
-                    Children = Array.Empty<AstChild>()
-                };
+                return ParseAngleExpression();
             case "OpenParen" when LooksLikeCast():
                 return ParseCastExpression();
             case "OpenParen":
