@@ -98,14 +98,19 @@ public sealed class Parser
         }
 
         // Heuristic: type identifier ... if followed by "(" treat as function, else variable.
-        if (IsTypeLike(startToken))
+        var typeIndex = SkipModifiersFrom(_position);
+        var typeToken = typeIndex < _tokens.Length ? _tokens[typeIndex] : null;
+
+        if (typeToken is not null && IsTypeLike(typeToken))
         {
-            if (LooksLikeFunctionSignature())
+            if (LooksLikeFunctionSignature(typeIndex))
             {
                 return ParseFunction();
             }
 
-            if (Peek(1) is { Kind: "Identifier" } || Peek(1) is { Kind: "Less" })
+            var nextIndex = typeIndex + 1;
+            var nextToken = PeekAbsolute(nextIndex);
+            if (nextToken is { Kind: "Identifier" } || nextToken is { Kind: "Less" })
             {
                 return ParseVariableDeclaration();
             }
@@ -206,8 +211,26 @@ public sealed class Parser
         var start = Current!.Span.Start;
         var children = new List<AstChild>();
 
+        var modifiers = new List<Token>();
+        while (Match("KeywordStatic") || Match("KeywordConst") || Match("KeywordUniform") || Match("KeywordExtern") || Match("KeywordVolatile"))
+        {
+            modifiers.Add(Consume());
+        }
+
         var typeTok = Consume();
-        children.Add(new AstChild { Role = "type", Node = Leaf("Type", typeTok) });
+        var typeNode = Leaf("Type", typeTok);
+        if (modifiers.Count > 0)
+        {
+            var typeSpan = new Span { Start = modifiers[0].Span.Start, End = typeTok.Span.End };
+            typeNode = new AstNode
+            {
+                Id = NextId(),
+                Kind = "Type",
+                Span = typeSpan,
+                Children = modifiers.Select(m => new AstChild { Role = "modifier", Node = Leaf("Modifier", m) }).ToArray()
+            };
+        }
+        children.Add(new AstChild { Role = "type", Node = typeNode });
 
         Token identTok;
         if (Match("Less"))
@@ -258,6 +281,10 @@ public sealed class Parser
             if (Match("KeywordAsm"))
             {
                 initializer = ParseAsmBlock();
+            }
+            else if (typeTok.Kind == "KeywordSampler" && Match("KeywordSamplerState"))
+            {
+                initializer = ParseInlineSamplerState();
             }
             else
             {
@@ -341,6 +368,29 @@ public sealed class Parser
             Id = NextId(),
             Kind = "AsmBlock",
             Span = span,
+            Children = Array.Empty<AstChild>()
+        };
+    }
+
+    private AstNode ParseInlineSamplerState()
+    {
+        var start = ConsumeExpected("KeywordSamplerState").Span.Start;
+        Span bodySpan;
+        if (Match("OpenBrace"))
+        {
+            bodySpan = ConsumeBlockSpan();
+        }
+        else
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' to start sampler_state body.", CurrentSpan());
+            bodySpan = CurrentSpan();
+        }
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "SamplerStateInitializer",
+            Span = new Span { Start = start, End = bodySpan.End },
             Children = Array.Empty<AstChild>()
         };
     }
@@ -1288,23 +1338,41 @@ public sealed class Parser
     private bool IsTypeLike(Token token) =>
         token.Kind.StartsWith("Keyword", StringComparison.Ordinal) || token.Kind == "Identifier";
 
+    private bool IsModifier(Token token) =>
+        token.Kind is "KeywordStatic" or "KeywordConst" or "KeywordUniform" or "KeywordExtern" or "KeywordVolatile";
+
+    private int SkipModifiersFrom(int index)
+    {
+        while (index < _tokens.Length && IsModifier(_tokens[index]))
+        {
+            index++;
+        }
+
+        return index;
+    }
+
+    private Token? PeekAbsolute(int index) =>
+        index >= 0 && index < _tokens.Length ? _tokens[index] : null;
+
     private bool IsBinaryOperator(Token token) =>
         token.Kind is "Plus" or "Minus" or "Star" or "Slash" or "Percent" or "Equals";
 
-    private bool LooksLikeFunctionSignature()
+    private bool LooksLikeFunctionSignature(int typeIndex = -1)
     {
-        if (!IsTypeLike(Current!))
+        var index = typeIndex >= 0 ? typeIndex : _position;
+        var typeTok = PeekAbsolute(index);
+        if (typeTok is null || !IsTypeLike(typeTok))
         {
             return false;
         }
 
         var lookahead = 1;
-        if (Peek(lookahead)?.Kind == "Less")
+        if (PeekAbsolute(index + lookahead)?.Kind == "Less")
         {
             var depth = 0;
             while (true)
             {
-                var tok = Peek(lookahead);
+                var tok = PeekAbsolute(index + lookahead);
                 if (tok is null)
                 {
                     return false;
@@ -1327,13 +1395,13 @@ public sealed class Parser
             }
         }
 
-        var nameTok = Peek(lookahead);
+        var nameTok = PeekAbsolute(index + lookahead);
         if (nameTok?.Kind != "Identifier")
         {
             return false;
         }
 
-        return Peek(lookahead + 1)?.Kind == "OpenParen";
+        return PeekAbsolute(index + lookahead + 1)?.Kind == "OpenParen";
     }
 
     private Token Consume()
