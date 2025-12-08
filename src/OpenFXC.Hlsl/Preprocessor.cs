@@ -112,28 +112,28 @@ public static class Preprocessor
             while (index < text.Length)
             {
                 var lineStart = index;
-                var line = ReadLine(text, ref index, out var newline);
-                var trimmed = line.AsSpan().TrimStart();
+                var logicalLine = ReadLogicalLine(text, ref index, out var newline, out var inputLength);
+                var trimmed = logicalLine.AsSpan().TrimStart();
 
                 var isDirective = trimmed.Length > 0 && trimmed[0] == '#';
                 if (isDirective)
                 {
-                    HandleDirective(path, lineStart, line, trimmed, newline, output);
+                    HandleDirective(path, lineStart, logicalLine, inputLength, trimmed, newline, output);
                     continue;
                 }
 
                 if (!IsActive)
                 {
                     output.Append(newline);
-                    AddSegment(path, lineStart, line.Length + newline.Length, output.Length - newline.Length, newline.Length);
+                    AddSegment(path, lineStart, inputLength, output.Length - newline.Length, newline.Length);
                     continue;
                 }
 
                 var outputStart = output.Length;
-                var expanded = ExpandMacros(line, outputStart, allowDirectives: false);
+                var expanded = ExpandMacros(logicalLine, outputStart, allowDirectives: false);
                 output.Append(expanded);
                 output.Append(newline);
-                AddSegment(path, lineStart, line.Length + newline.Length, outputStart, expanded.Length + newline.Length);
+                AddSegment(path, lineStart, inputLength, outputStart, expanded.Length + newline.Length);
             }
 
             _includeStack.Remove(path);
@@ -167,7 +167,38 @@ public static class Preprocessor
             return text.Substring(start, end - start);
         }
 
-        private void HandleDirective(string currentPath, int lineStart, string line, ReadOnlySpan<char> trimmed, string newline, StringBuilder output)
+        private string ReadLogicalLine(string text, ref int index, out string newline, out int inputLength)
+        {
+            var logical = new StringBuilder();
+            var totalInput = 0;
+            string lastNewline = string.Empty;
+
+            while (index < text.Length)
+            {
+                var lineStart = index;
+                var line = ReadLine(text, ref index, out var nl);
+                totalInput += (index - lineStart);
+                lastNewline = nl;
+
+                var trimmed = line.AsSpan().TrimEnd();
+                var hasContinuation = trimmed.Length > 0 && trimmed[^1] == '\\';
+                if (hasContinuation)
+                {
+                    // Drop the trailing backslash for logical line content.
+                    logical.Append(line[..^1]);
+                    continue;
+                }
+
+                logical.Append(line);
+                break;
+            }
+
+            newline = lastNewline;
+            inputLength = totalInput;
+            return logical.ToString();
+        }
+
+        private void HandleDirective(string currentPath, int lineStart, string line, int inputLength, ReadOnlySpan<char> trimmed, string newline, StringBuilder output)
         {
             // Remove leading '#' and any whitespace after it.
             var directive = trimmed[1..].TrimStart();
@@ -230,7 +261,7 @@ public static class Preprocessor
             var outputEnd = output.Length;
             if (mapDirective && outputEnd > outputStart)
             {
-                AddSegment(currentPath, lineStart, line.Length + newline.Length, outputStart, outputEnd - outputStart);
+                AddSegment(currentPath, lineStart, inputLength, outputStart, outputEnd - outputStart);
             }
         }
 
