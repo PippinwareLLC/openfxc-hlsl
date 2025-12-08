@@ -1146,12 +1146,16 @@ public sealed class Parser
                     Children = Array.Empty<AstChild>()
                 }
             });
-            ConsumeExpected("Semicolon");
+            Token? terminator = null;
+            if (Match("Semicolon"))
+            {
+                terminator = Consume();
+            }
             return new AstNode
             {
                 Id = NextId(),
                 Kind = "BufferDeclaration",
-                Span = new Span { Start = start, End = span.End },
+                Span = new Span { Start = start, End = terminator?.Span.End ?? span.End },
                 Children = children.ToArray()
             };
         }
