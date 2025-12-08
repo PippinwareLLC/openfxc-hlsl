@@ -695,6 +695,19 @@ public sealed class Parser
             return WrapWithAttributes(attributes, stmt);
         }
 
+        if (Current!.Kind == "Semicolon")
+        {
+            var semi = Consume();
+            var stmt = new AstNode
+            {
+                Id = NextId(),
+                Kind = "EmptyStatement",
+                Span = semi.Span,
+                Children = Array.Empty<AstChild>()
+            };
+            return WrapWithAttributes(attributes, stmt);
+        }
+
         // Local variable declaration heuristic inside blocks: type Identifier ...
         var typeIndex = SkipModifiersFrom(_position);
         var typeTok = PeekAbsolute(typeIndex);
