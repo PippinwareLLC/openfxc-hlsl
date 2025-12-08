@@ -55,69 +55,70 @@ public sealed class Parser
 
     private AstNode? ParseDeclaration()
     {
+        var attributes = ParseAttributes();
         var startToken = Current;
         if (startToken is null)
         {
             return null;
         }
 
+        AstNode? decl = null;
+
         if (startToken.Kind == "KeywordTypedef")
         {
-            return ParseTypedef();
+            decl = ParseTypedef();
+        }
+        else if (startToken.Kind is "KeywordStruct" or "KeywordClass" or "KeywordInterface")
+        {
+            decl = ParseStructLike(startToken.Kind);
+        }
+        else if (startToken.Kind is "KeywordTechnique" or "KeywordTechnique10")
+        {
+            decl = ParseTechnique(startToken.Kind);
+        }
+        else if (startToken.Kind is "KeywordCBuffer" or "KeywordTBuffer")
+        {
+            decl = ParseCBuffer();
+        }
+        else if (startToken.Kind == "KeywordSamplerState")
+        {
+            decl = ParseSamplerState();
+        }
+        var isFx10StateKeyword = startToken.Kind is "KeywordDepthStencilState" or "KeywordBlendState" or "KeywordRasterizerState" or "KeywordSamplerState10";
+        if (decl is null && isFx10StateKeyword && Peek(1) is { Kind: "Identifier" } && Peek(2) is { Kind: "OpenBrace" })
+        {
+            decl = ParseFx10StateObject(startToken.Kind);
         }
 
-        if (startToken.Kind is "KeywordStruct" or "KeywordClass" or "KeywordInterface")
+        if (decl is null)
         {
-            return ParseStructLike(startToken.Kind);
-        }
+            var typeIndex = SkipModifiersFrom(_position);
+            var typeToken = typeIndex < _tokens.Length ? _tokens[typeIndex] : null;
 
-        if (startToken.Kind is "KeywordTechnique" or "KeywordTechnique10")
-        {
-            return ParseTechnique(startToken.Kind);
-        }
-
-        // CBuffer/TBuffer blocks
-        if (startToken.Kind is "KeywordCBuffer" or "KeywordTBuffer")
-        {
-            return ParseCBuffer();
-        }
-
-        // Sampler state blocks
-        if (startToken.Kind == "KeywordSamplerState")
-        {
-            return ParseSamplerState();
-        }
-
-        // FX10 state objects
-        if (startToken.Kind is "KeywordDepthStencilState" or "KeywordBlendState" or "KeywordRasterizerState" or "KeywordSamplerState10")
-        {
-            if (Peek(1) is { Kind: "Identifier" } && Peek(2) is { Kind: "OpenBrace" })
+            if (typeToken is not null && IsTypeLike(typeToken))
             {
-                return ParseFx10StateObject(startToken.Kind);
+                if (LooksLikeFunctionSignature(typeIndex))
+                {
+                    decl = ParseFunction();
+                }
+                else
+                {
+                    var nextIndex = typeIndex + 1;
+                    var nextToken = PeekAbsolute(nextIndex);
+                    if (nextToken is { Kind: "Identifier" } || nextToken is { Kind: "Less" })
+                    {
+                        decl = ParseVariableDeclaration();
+                    }
+                }
+            }
+            else
+            {
+                // Fallback: expression statement at top level.
+                decl = ParseExpressionStatement();
             }
         }
 
-        // Heuristic: type identifier ... if followed by "(" treat as function, else variable.
-        var typeIndex = SkipModifiersFrom(_position);
-        var typeToken = typeIndex < _tokens.Length ? _tokens[typeIndex] : null;
-
-        if (typeToken is not null && IsTypeLike(typeToken))
-        {
-            if (LooksLikeFunctionSignature(typeIndex))
-            {
-                return ParseFunction();
-            }
-
-            var nextIndex = typeIndex + 1;
-            var nextToken = PeekAbsolute(nextIndex);
-            if (nextToken is { Kind: "Identifier" } || nextToken is { Kind: "Less" })
-            {
-                return ParseVariableDeclaration();
-            }
-        }
-
-        // Fallback: expression statement at top level.
-        return ParseExpressionStatement();
+        return WrapDeclarationAttributes(attributes, decl);
     }
 
     private AstNode ParseFunction() => ParseFunctionLike(allowSignatureOnly: false);
@@ -127,8 +128,25 @@ public sealed class Parser
         var start = Current!.Span.Start;
         var children = new List<AstChild>();
 
+        var modifiers = new List<Token>();
+        while (!IsEnd && IsModifier(Current!))
+        {
+            modifiers.Add(Consume());
+        }
+
         var returnType = Consume();
-        children.Add(new AstChild { Role = "type", Node = Leaf("Type", returnType) });
+        AstNode typeNode = Leaf("Type", returnType);
+        if (modifiers.Count > 0)
+        {
+            typeNode = new AstNode
+            {
+                Id = NextId(),
+                Kind = "Type",
+                Span = new Span { Start = modifiers[0].Span.Start, End = returnType.Span.End },
+                Children = modifiers.Select(m => new AstChild { Role = "modifier", Node = Leaf("Modifier", m) }).ToArray()
+            };
+        }
+        children.Add(new AstChild { Role = "type", Node = typeNode });
 
         if (Match("Less"))
         {
@@ -212,7 +230,7 @@ public sealed class Parser
         var children = new List<AstChild>();
 
         var modifiers = new List<Token>();
-        while (Match("KeywordStatic") || Match("KeywordConst") || Match("KeywordUniform") || Match("KeywordExtern") || Match("KeywordVolatile"))
+        while (!IsEnd && IsModifier(Current!))
         {
             modifiers.Add(Consume());
         }
@@ -525,6 +543,8 @@ public sealed class Parser
     {
         if (IsEnd) return null;
 
+        var attributes = ParseAttributes();
+
         if (Current!.Kind == "KeywordReturn")
         {
             return ParseReturnStatement();
@@ -573,22 +593,27 @@ public sealed class Parser
         {
             var start = Consume().Span.Start;
             ConsumeExpected("Semicolon");
-            return new AstNode
+            var stmt = new AstNode
             {
                 Id = NextId(),
                 Kind = "DiscardStatement",
                 Span = new Span { Start = start, End = CurrentSpan().End },
                 Children = Array.Empty<AstChild>()
             };
+            return WrapWithAttributes(attributes, stmt);
         }
 
         // Local variable declaration heuristic inside blocks: type Identifier ...
-        if (IsTypeLike(Current!) && (Peek(1)?.Kind == "Identifier" || Peek(1)?.Kind == "Less") && Peek(2)?.Kind != "OpenParen")
+        var typeIndex = SkipModifiersFrom(_position);
+        var typeTok = PeekAbsolute(typeIndex);
+        if (typeTok is not null && IsTypeLike(typeTok) && (PeekAbsolute(typeIndex + 1)?.Kind == "Identifier" || PeekAbsolute(typeIndex + 1)?.Kind == "Less") && PeekAbsolute(typeIndex + 2)?.Kind != "OpenParen")
         {
-            return ParseVariableDeclaration();
+            var decl = ParseVariableDeclaration();
+            return WrapWithAttributes(attributes, decl);
         }
 
-        return ParseExpressionStatement();
+        var exprStmt = ParseExpressionStatement();
+        return WrapWithAttributes(attributes, exprStmt);
     }
 
     private AstNode ParseIfStatement()
@@ -1333,16 +1358,18 @@ public sealed class Parser
                 continue;
             }
 
-            if (IsTypeLike(Current!))
+            var typeIndex = SkipModifiersFrom(_position);
+            var typeTok = PeekAbsolute(typeIndex);
+            if (typeTok is not null && IsTypeLike(typeTok))
             {
-                if (LooksLikeFunctionSignature())
+                if (LooksLikeFunctionSignature(typeIndex))
                 {
                     var method = ParseFunctionLike(allowSignatureOnly: true);
                     members.Add(new AstChild { Role = "member", Node = method });
                     continue;
                 }
 
-                if (Peek(1) is { Kind: "Identifier" } || Peek(1) is { Kind: "Less" })
+                if (PeekAbsolute(typeIndex + 1) is { Kind: "Identifier" } || PeekAbsolute(typeIndex + 1) is { Kind: "Less" })
                 {
                     var decl = ParseVariableDeclaration();
                     members.Add(new AstChild { Role = "member", Node = decl });
@@ -1594,13 +1621,20 @@ public sealed class Parser
         token.Kind.StartsWith("Keyword", StringComparison.Ordinal) || token.Kind == "Identifier";
 
     private bool IsModifier(Token token) =>
-        token.Kind is "KeywordStatic" or "KeywordConst" or "KeywordUniform" or "KeywordExtern" or "KeywordVolatile";
+        token.Kind is "KeywordStatic" or "KeywordConst" or "KeywordUniform" or "KeywordExtern" or "KeywordVolatile" ||
+        (token.Kind == "Identifier" && (string.Equals(token.Text, "row_major", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(token.Text, "column_major", StringComparison.OrdinalIgnoreCase)));
 
     private bool IsParameterModifier(Token token) =>
         IsModifier(token) ||
         (token.Kind == "Identifier" && (string.Equals(token.Text, "in", StringComparison.OrdinalIgnoreCase)
                                         || string.Equals(token.Text, "out", StringComparison.OrdinalIgnoreCase)
-                                        || string.Equals(token.Text, "inout", StringComparison.OrdinalIgnoreCase)));
+                                        || string.Equals(token.Text, "inout", StringComparison.OrdinalIgnoreCase)
+                                        || string.Equals(token.Text, "triangle", StringComparison.OrdinalIgnoreCase)
+                                        || string.Equals(token.Text, "line", StringComparison.OrdinalIgnoreCase)
+                                        || string.Equals(token.Text, "point", StringComparison.OrdinalIgnoreCase)
+                                        || string.Equals(token.Text, "lineadj", StringComparison.OrdinalIgnoreCase)
+                                        || string.Equals(token.Text, "triangleadj", StringComparison.OrdinalIgnoreCase)));
 
     private bool IsAssignmentOperator(string kind) =>
         kind is "Equals" or "PlusEquals" or "MinusEquals" or "StarEquals" or "SlashEquals" or "PercentEquals" or "AmpersandEquals" or "PipeEquals" or "CaretEquals" or "LessLessEquals" or "GreaterGreaterEquals";
@@ -1683,13 +1717,84 @@ public sealed class Parser
             return false;
         }
 
-        // Require something expression-like after the cast, otherwise treat "(Identifier)" as grouping.
-        if (after is null || after.Kind is "Semicolon" or "CloseParen" or "CloseBrace" or "Comma")
+        if (after is null)
         {
             return false;
         }
 
-        return true;
+        var startsExpression = after.Kind is "Identifier" or "NumericLiteral" or "OpenParen" or "Plus" or "Minus" ||
+                               after.Kind.StartsWith("Keyword", StringComparison.Ordinal);
+
+        return startsExpression;
+    }
+
+    private AstNode WrapWithAttributes(List<AstChild> attributes, AstNode? statement)
+    {
+        var stmtNode = statement ?? new AstNode { Id = NextId(), Kind = "EmptyStatement", Span = CurrentSpan(), Children = Array.Empty<AstChild>() };
+        if (attributes.Count == 0)
+        {
+            return stmtNode;
+        }
+
+        var start = attributes[0].Node.Span.Start;
+        var end = stmtNode.Span.End;
+        var children = new List<AstChild>(attributes) { new AstChild { Role = "statement", Node = stmtNode } };
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "AttributedStatement",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
+    private AstNode? WrapDeclarationAttributes(List<AstChild> attributes, AstNode? declaration)
+    {
+        if (attributes.Count == 0)
+        {
+            return declaration;
+        }
+
+        var declNode = declaration ?? new AstNode { Id = NextId(), Kind = "EmptyDeclaration", Span = CurrentSpan(), Children = Array.Empty<AstChild>() };
+        var start = attributes[0].Node.Span.Start;
+        var end = declNode.Span.End;
+        var children = new List<AstChild>(attributes) { new AstChild { Role = "declaration", Node = declNode } };
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "AttributedDeclaration",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
+    private List<AstChild> ParseAttributes()
+    {
+        var attributes = new List<AstChild>();
+        while (Match("OpenBracket"))
+        {
+            var start = Consume().Span.Start;
+            while (!IsEnd && !Match("CloseBracket"))
+            {
+                Consume();
+            }
+            var end = Match("CloseBracket") ? Consume().Span.End : CurrentSpan().End;
+            attributes.Add(new AstChild
+            {
+                Role = "attribute",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "Attribute",
+                    Span = new Span { Start = start, End = end },
+                    Children = Array.Empty<AstChild>()
+                }
+            });
+        }
+
+        return attributes;
     }
 
     private Token Consume()

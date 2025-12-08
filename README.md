@@ -73,7 +73,7 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 | SM2.x / SM3.x | Done | Complete | Functions with parameter/return semantics, structs/typedefs, arrays, control flow, sampler-heavy code |
 | SM4.x | Done | Complete | `cbuffer`/`tbuffer` with bindings, resource templates, class/interface/method signatures |
 | SM5.x | Done | Complete | RW/structured/byte address resources with bindings and expressions/statements |
-| FX constructs (.fx) | Done | Complete | Technique/technique10/pass bodies parsed syntax-only, FX10 state objects, Compile/Set shader calls tokenized |
+| FX constructs (.fx) | Done | Complete | Technique/technique10/pass bodies parsed syntax-only, FX10 state objects, standalone SamplerState/BlendState/DepthStencilState/RasterizerState declarations with bindings, Compile/Set shader calls tokenized |
 
 ## DXSDK Sample Coverage (lex/parse smoke)
 
