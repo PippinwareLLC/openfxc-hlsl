@@ -1346,6 +1346,11 @@ public sealed class Parser
         };
         children.Add(new AstChild { Role = "body", Node = bodyNode });
 
+        if (Match("Semicolon"))
+        {
+            Consume();
+        }
+
         return new AstNode
         {
             Id = NextId(),
