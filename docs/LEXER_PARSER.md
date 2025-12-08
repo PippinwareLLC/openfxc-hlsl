@@ -3,6 +3,7 @@
 This document summarizes how the HLSL front-end is structured so contributors can confidently evolve the lexer and parser while preserving determinism and FXC-era behavior.
 
 ## Pipeline Overview
+- A lightweight preprocessor runs first to expand `#define`/`#include`/`#if` directives (deterministic, no stringizing/`##`, missing includes become diagnostics). Include search order matches `-I` paths with quoted includes preferring the current file's directory.
 - Input text is tokenized by `HlslLexer.Lex`, producing ordered tokens with spans/trivia and lex diagnostics.
 - The parser (`Parser.Parse`) consumes the token stream to build an AST rooted at `CompilationUnit`, emitting parse diagnostics but always returning a tree.
 - CLI entrypoints (`openfxc-hlsl lex|parse`) wrap the results into JSON per `docs/TDD.md` with `formatVersion: 1`.

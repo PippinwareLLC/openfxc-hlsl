@@ -68,6 +68,7 @@ Tools must accept:
 
 * `-i <file>` or piped input
 * `-o <file>` or stdout output
+* `-I <dir>` include search paths for the preprocessor (repeatable; quoted includes also search the current file's directory)
 
 ## 1.2 Exit Codes
 
@@ -75,6 +76,16 @@ Tools must accept:
 | ---- | ------------------------------------------ |
 | 0    | Successful execution (diagnostics allowed) |
 | 1    | Internal error / exception                 |
+
+## 1.3 Preprocessor
+
+`openfxc-hlsl` runs a lightweight, deterministic preprocessor before lexing and parsing:
+
+- Supported directives: `#include`, `#define` / `#undef` (object + simple function-like macros), `#if` / `#ifdef` / `#ifndef` / `#elif` / `#else` / `#endif`, `#pragma once`, and `#error`.
+- Conditional expressions support integer literals, logical operators (`!`, `&&`, `||`, `==`, `!=`), and the `defined` operator. No macro concatenation/stringizing yet.
+- Include resolution: quoted includes search the current file's directory first, then `-I` include directories; angle-bracket includes search only include directories. Missing includes emit diagnostics but keep preprocessing deterministic.
+- Diagnostics (preprocessor): `HLSL2001` (include missing/invalid), `HLSL2002` (include cycle), `HLSL2003` (unterminated conditional), `HLSL2004` (unexpected `#endif`/`#elif`/`#else`), `HLSL2005` (unterminated macro invocation), `HLSL2006` (`#error` payload).
+- Spans and `source.length` in lex/parse JSON reflect the preprocessed text; line breaks from skipped blocks are preserved to keep spans monotonic.
 
 ---
 
@@ -415,8 +426,6 @@ OpenFXC-HLSL parser is considered **complete for SM1–SM5 syntax** when:
 
 # 9. Future Extensions (Not Required for DoD)
 
-* Preprocessor evaluation (`#define`, macro expansion)
-* Include resolution
 * AST to canonical HLSL emitter
 * Language server protocol (LSP) integration
 * Recoverable AST rewriter for IDE tooling

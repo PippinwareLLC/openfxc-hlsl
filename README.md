@@ -13,8 +13,9 @@ This project was created by peeling off the commits from Pippinware LLCs' in-pro
 1. Build: `dotnet build src/openfxc-hlsl/openfxc-hlsl.csproj`
 2. Lex: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe lex -i path/to/file.hlsl`
 3. Parse: `src/openfxc-hlsl/bin/Debug/net8.0/openfxc-hlsl.exe parse -i path/to/file.hlsl`
+4. Preprocessor: runs automatically for `lex`/`parse` to expand `#define`/`#include`/`#if`; add include search paths with `-I <dir>` (quoted includes search the source file's folder first).
 
-Current output includes full lexing for SM1–SM5 and FX constructs; parsing now covers era-specific declarations (samplers/sampler_state, semantics/register/bindings, cbuffer/tbuffer, class/interface/struct bodies, typedefs) and FX technique/pass bodies (syntax-only) with a `CompilationUnit` AST and diagnostics. Schema matches `docs/TDD.md`.
+Current output includes full lexing for SM1-SM5 and FX constructs; parsing now covers era-specific declarations (samplers/sampler_state, semantics/register/bindings, cbuffer/tbuffer, class/interface/struct bodies, typedefs) and FX technique/pass bodies (syntax-only) with a `CompilationUnit` AST and diagnostics. Schema matches `docs/TDD.md`.
 
 ## Testing
 - Run all tests: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj`
@@ -46,8 +47,9 @@ Artifacts land under `src/openfxc-hlsl/bin/Release/net8.0/<rid>/publish/`. Add `
 - Example (C#):
   ```csharp
   var text = File.ReadAllText("shader.hlsl");
-  var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
-  var (root, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+  var pre = Preprocessor.Preprocess(text, new PreprocessorOptions { FilePath = "shader.hlsl" });
+  var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
+  var (root, parseDiagnostics) = Parser.Parse(tokens, pre.Text.Length);
   ```
 - Reference the project directly or the built DLL to consume the lexer/parser from other tools.
 
@@ -57,6 +59,7 @@ Artifacts land under `src/openfxc-hlsl/bin/Release/net8.0/<rid>/publish/`. Add `
 - Scope: Syntax-only SM1-SM5 FXC-era HLSL (no semantics, IR, or bytecode in this layer)
 - Milestones: `docs/MILESTONES.md`
 - Architecture: `docs/LEXER_PARSER.md` (lexer/parser internals, diagnostics, recovery, determinism)
+- DX9 bytecode + compiler behavior: `docs/dx9_bytecode.md`
 
 ## Contributing
 We take contributions from the community for .hlsl/.fx files for SM1-SM5, please send us your shader code or fixes/addition via PR. Thank you!
@@ -77,4 +80,7 @@ We take contributions from the community for .hlsl/.fx files for SM1-SM5, please
 - Lexing: runs without crashes across all samples; diagnostics logged where legacy/non-HLSL text appears but tokens are produced.
 - Parsing: always returns a `CompilationUnit` with full-span coverage; diagnostics are allowed for syntax outside the FXC-era subset, but trees are produced for every sample.
 - To run locally: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj` (includes sample smoke) or `tests/run-all.cmd` / `tests/run-all.sh`.
-- Samples attribution: the DX9/DXSDK `.fx` files are sourced from Microsoft DirectX SDK drops (e.g., Dec 2002, DXSDK_Feb10) and remain © Microsoft; included here solely for testing/compatibility purposes.
+- Samples attribution: the DX9/DXSDK `.fx` files are sourced from Microsoft DirectX SDK drops (e.g., Dec 2002, DXSDK_Feb10) and remain (c) Microsoft; included here solely for testing/compatibility purposes.
+
+
+

@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using OpenFXC.Hlsl;
+using System.Collections.Generic;
 using System.Linq;
 
 internal sealed class Program
@@ -22,13 +23,32 @@ internal sealed class Program
 
             var input = ReadInput(options.InputPath);
             var fileName = options.InputPath is null ? "stdin" : Path.GetFileName(options.InputPath);
-            var length = input.Length;
-            var (tokens, diagnostics) = HlslLexer.Lex(input);
+            var includeDirs = new List<string>(options.IncludeDirectories);
+            if (options.InputPath is not null)
+            {
+                var dir = Path.GetDirectoryName(options.InputPath);
+                if (!string.IsNullOrEmpty(dir))
+                {
+                    includeDirs.Insert(0, dir);
+                }
+            }
+
+            var preOptions = new PreprocessorOptions
+            {
+                FilePath = options.InputPath,
+                IncludeDirectories = includeDirs
+            };
+
+            var preprocessed = Preprocessor.Preprocess(input, preOptions);
+            var length = preprocessed.Text.Length;
+
+            var (tokens, lexDiagnostics) = HlslLexer.Lex(preprocessed.Text);
+            var combinedLexDiagnostics = preprocessed.Diagnostics.Concat(lexDiagnostics).ToArray();
 
             string json = command switch
             {
-                "lex" => Serialize(new LexResult(FormatVersion, new SourceInfo(fileName, length), tokens, diagnostics)),
-                "parse" => Serialize(BuildParseResult(fileName, length, tokens, diagnostics)),
+                "lex" => Serialize(new LexResult(FormatVersion, new SourceInfo(fileName, length), tokens, combinedLexDiagnostics)),
+                "parse" => Serialize(BuildParseResult(fileName, length, tokens, combinedLexDiagnostics)),
                 _ => throw new InvalidOperationException($"Unknown command '{command}'. Expected 'lex' or 'parse'.")
             };
 
@@ -47,14 +67,15 @@ internal sealed class Program
 
     private static void PrintUsage()
     {
-        Console.WriteLine("openfxc-hlsl <lex|parse> [-i <file>] [-o <file>]");
-        Console.WriteLine("Reads HLSL from -i or stdin and emits JSON to -o or stdout.");
+        Console.WriteLine("openfxc-hlsl <lex|parse> [-i <file>] [-o <file>] [-I <dir>]");
+        Console.WriteLine("Reads HLSL from -i or stdin, runs a lightweight preprocessor, and emits JSON to -o or stdout.");
     }
 
     private static CliOptions ParseArgs(string[] args)
     {
         string? input = null;
         string? output = null;
+        var includeDirs = new List<string>();
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -72,12 +93,16 @@ internal sealed class Program
                     // Accept but ignore for now; only JSON supported.
                     RequireNext(args, ref i, "format");
                     break;
+                case "-I":
+                case "--include":
+                    includeDirs.Add(RequireNext(args, ref i, "include directory"));
+                    break;
                 default:
                     throw new InvalidOperationException($"Unknown argument '{args[i]}'.");
             }
         }
 
-        return new CliOptions(input, output);
+        return new CliOptions(input, output, includeDirs.ToArray());
     }
 
     private static string RequireNext(string[] args, ref int index, string name)
@@ -137,5 +162,5 @@ internal sealed class Program
             allDiagnostics);
     }
 
-    private record CliOptions(string? InputPath, string? OutputPath);
+    private record CliOptions(string? InputPath, string? OutputPath, IReadOnlyList<string> IncludeDirectories);
 }
