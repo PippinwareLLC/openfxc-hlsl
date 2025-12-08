@@ -24,8 +24,14 @@ public class LexingTests
         var text = File.ReadAllText(fixturePath);
         var expectedJson = File.ReadAllText(expectedPath);
 
-        var (tokens, diagnostics) = HlslLexer.Lex(text);
-        var result = new LexResult(FormatVersion, new SourceInfo("sm1-snapshot.hlsl", text.Length), tokens, diagnostics);
+        var pre = Preprocessor.Preprocess(text, new PreprocessorOptions
+        {
+            FilePath = fixturePath,
+            IncludeDirectories = new[] { Path.GetDirectoryName(fixturePath) ?? string.Empty }
+        });
+
+        var (tokens, diagnostics) = HlslLexer.Lex(pre.Text);
+        var result = new LexResult(FormatVersion, new SourceInfo(fixturePath, pre.Text.Length), tokens, diagnostics.Concat(pre.Diagnostics).ToArray());
 
         var actualNode = JsonNode.Parse(JsonSerializer.Serialize(result, SerializerOptions))!;
         var expectedNode = JsonNode.Parse(expectedJson)!;
@@ -67,8 +73,14 @@ public class LexingTests
         var text = File.ReadAllText(fixturePath);
         var expectedJson = File.ReadAllText(expectedPath);
 
-        var (tokens, diagnostics) = HlslLexer.Lex(text);
-        var result = new LexResult(FormatVersion, new SourceInfo("sm2-snapshot.hlsl", text.Length), tokens, diagnostics);
+        var pre = Preprocessor.Preprocess(text, new PreprocessorOptions
+        {
+            FilePath = fixturePath,
+            IncludeDirectories = new[] { Path.GetDirectoryName(fixturePath) ?? string.Empty }
+        });
+
+        var (tokens, diagnostics) = HlslLexer.Lex(pre.Text);
+        var result = new LexResult(FormatVersion, new SourceInfo(fixturePath, pre.Text.Length), tokens, diagnostics.Concat(pre.Diagnostics).ToArray());
 
         var actualNode = JsonNode.Parse(JsonSerializer.Serialize(result, SerializerOptions))!;
         var expectedNode = JsonNode.Parse(expectedJson)!;
@@ -85,8 +97,14 @@ public class LexingTests
         var text = File.ReadAllText(fixturePath);
         var expectedJson = File.ReadAllText(expectedPath);
 
-        var (tokens, diagnostics) = HlslLexer.Lex(text);
-        var result = new LexResult(FormatVersion, new SourceInfo("sm4-snapshot.hlsl", text.Length), tokens, diagnostics);
+        var pre = Preprocessor.Preprocess(text, new PreprocessorOptions
+        {
+            FilePath = fixturePath,
+            IncludeDirectories = new[] { Path.GetDirectoryName(fixturePath) ?? string.Empty }
+        });
+
+        var (tokens, diagnostics) = HlslLexer.Lex(pre.Text);
+        var result = new LexResult(FormatVersion, new SourceInfo(fixturePath, pre.Text.Length), tokens, diagnostics.Concat(pre.Diagnostics).ToArray());
 
         var actualNode = JsonNode.Parse(JsonSerializer.Serialize(result, SerializerOptions))!;
         var expectedNode = JsonNode.Parse(expectedJson)!;
@@ -103,8 +121,14 @@ public class LexingTests
         var text = File.ReadAllText(fixturePath);
         var expectedJson = File.ReadAllText(expectedPath);
 
-        var (tokens, diagnostics) = HlslLexer.Lex(text);
-        var result = new LexResult(FormatVersion, new SourceInfo("Simple.fx", text.Length), tokens, diagnostics);
+        var pre = Preprocessor.Preprocess(text, new PreprocessorOptions
+        {
+            FilePath = fixturePath,
+            IncludeDirectories = new[] { Path.GetDirectoryName(fixturePath) ?? string.Empty }
+        });
+
+        var (tokens, diagnostics) = HlslLexer.Lex(pre.Text);
+        var result = new LexResult(FormatVersion, new SourceInfo(fixturePath, pre.Text.Length), tokens, diagnostics.Concat(pre.Diagnostics).ToArray());
 
         var actualNode = JsonNode.Parse(JsonSerializer.Serialize(result, SerializerOptions))!;
         var expectedNode = JsonNode.Parse(expectedJson)!;

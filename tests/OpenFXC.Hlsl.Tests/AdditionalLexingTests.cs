@@ -155,9 +155,14 @@ public class AdditionalLexingTests
 
         var glowPath = Path.Combine(repoRoot, "samples", "dxsdk", "dx9sdk", "Samples", "Media", "EffectEdit", "Glow.fx");
         var glowText = File.ReadAllText(glowPath);
+        var pre = Preprocessor.Preprocess(glowText, new PreprocessorOptions
+        {
+            FilePath = glowPath,
+            IncludeDirectories = new[] { Path.GetDirectoryName(glowPath) ?? string.Empty }
+        });
 
-        var (tokens, diagnostics) = HlslLexer.Lex(glowText);
-        var result = new LexResult(1, new SourceInfo("Glow.fx", glowText.Length), tokens, diagnostics);
+        var (tokens, diagnostics) = HlslLexer.Lex(pre.Text);
+        var result = new LexResult(1, new SourceInfo(glowPath, pre.Text.Length), tokens, diagnostics.Concat(pre.Diagnostics).ToArray());
 
         var actualJson = JsonSerializer.Serialize(result, JsonOptions);
         Assert.Equal(

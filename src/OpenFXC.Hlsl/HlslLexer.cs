@@ -79,6 +79,7 @@ public static class HlslLexer
         ["technique"] = "KeywordTechnique",
         ["pass"] = "KeywordPass",
         ["technique10"] = "KeywordTechnique10",
+        ["asm"] = "KeywordAsm",
     };
 
     private const string DiagnosticUnknown = "HLSL0001";

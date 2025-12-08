@@ -63,14 +63,19 @@ public class ParserSnapshotTests
     private static ParseResult BuildParseResult(string fixturePath)
     {
         var text = File.ReadAllText(fixturePath);
-        var fileName = Path.GetFileName(fixturePath);
-        var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
-        var (root, parseDiagnostics) = Parser.Parse(tokens, text.Length);
-        var allDiagnostics = lexDiagnostics.Concat(parseDiagnostics).ToArray();
+        var pre = Preprocessor.Preprocess(text, new PreprocessorOptions
+        {
+            FilePath = fixturePath,
+            IncludeDirectories = new[] { Path.GetDirectoryName(fixturePath) ?? string.Empty }
+        });
+
+        var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
+        var (root, parseDiagnostics) = Parser.Parse(tokens, pre.Text.Length);
+        var allDiagnostics = lexDiagnostics.Concat(parseDiagnostics).Concat(pre.Diagnostics).ToArray();
 
         return new ParseResult(
             FormatVersion,
-            new SourceInfo(fileName, text.Length),
+            new SourceInfo(fixturePath, pre.Text.Length),
             root,
             tokens,
             allDiagnostics);

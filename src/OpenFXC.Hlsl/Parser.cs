@@ -254,10 +254,19 @@ public sealed class Parser
         if (Match("Equals"))
         {
             Consume(); // =
-            var expr = ParseExpression();
-            if (expr is not null)
+            AstNode? initializer = null;
+            if (Match("KeywordAsm"))
             {
-                children.Add(new AstChild { Role = "initializer", Node = expr });
+                initializer = ParseAsmBlock();
+            }
+            else
+            {
+                initializer = ParseExpression();
+            }
+
+            if (initializer is not null)
+            {
+                children.Add(new AstChild { Role = "initializer", Node = initializer });
             }
         }
 
@@ -310,6 +319,29 @@ public sealed class Parser
             Kind = "Block",
             Span = new Span { Start = start, End = endSpan.End },
             Children = statements.ToArray()
+        };
+    }
+
+    private AstNode ParseAsmBlock()
+    {
+        var asmTok = ConsumeExpected("KeywordAsm");
+        Span span;
+        if (Match("OpenBrace"))
+        {
+            span = ConsumeBlockSpan();
+        }
+        else
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' to start asm block.", CurrentSpan());
+            span = asmTok.Span;
+        }
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "AsmBlock",
+            Span = span,
+            Children = Array.Empty<AstChild>()
         };
     }
 
