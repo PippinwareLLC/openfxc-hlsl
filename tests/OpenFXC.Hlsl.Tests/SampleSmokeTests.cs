@@ -3,6 +3,7 @@ using Xunit;
 using System;
 using System.Linq;
 using Xunit.Abstractions;
+using System.Text.Json;
 
 namespace OpenFXC.Hlsl.Tests;
 
@@ -33,12 +34,13 @@ public class SampleSmokeTests
         _output.WriteLine($"[sample] {path}");
         var text = File.ReadAllText(path);
 
+        var includeDirs = ResolveIncludeDirectories(path);
         var pre = Preprocessor.Preprocess(
             text,
             new PreprocessorOptions
             {
                 FilePath = path,
-                IncludeDirectories = new[] { Path.GetDirectoryName(path) ?? string.Empty }
+                IncludeDirectories = includeDirs
             });
 
         var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
@@ -67,12 +69,13 @@ public class SampleSmokeTests
         _output.WriteLine($"[sample] {path}");
         var text = File.ReadAllText(path);
 
+        var includeDirs = ResolveIncludeDirectories(path);
         var pre = Preprocessor.Preprocess(
             text,
             new PreprocessorOptions
             {
                 FilePath = path,
-                IncludeDirectories = new[] { Path.GetDirectoryName(path) ?? string.Empty }
+                IncludeDirectories = includeDirs
             });
 
         var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
@@ -98,6 +101,54 @@ public class SampleSmokeTests
 
     private static bool IsStrictSampleSweep() =>
         string.Equals(Environment.GetEnvironmentVariable("OPENFXC_STRICT_SAMPLES"), "1", StringComparison.Ordinal);
+
+    private static string[] ResolveIncludeDirectories(string path)
+    {
+        var dirs = new List<string>();
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir))
+        {
+            dirs.Add(dir);
+        }
+
+        var dxsdkRoot = Path.Combine(RepoRoot, "samples", "dxsdk");
+        var cursor = dir;
+        while (!string.IsNullOrEmpty(cursor) && cursor.StartsWith(dxsdkRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            var configPath = Path.Combine(cursor, "includes.json");
+            if (File.Exists(configPath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(configPath);
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var element in doc.RootElement.EnumerateArray())
+                        {
+                            if (element.ValueKind == JsonValueKind.String)
+                            {
+                                var rel = element.GetString() ?? string.Empty;
+                                if (!string.IsNullOrWhiteSpace(rel))
+                                {
+                                    var includeDir = Path.GetFullPath(Path.Combine(cursor, rel));
+                                    dirs.Add(includeDir);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // ignore malformed include configs to keep sweeps running
+                }
+            }
+
+            cursor = Path.GetDirectoryName(cursor);
+        }
+
+        return dirs.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+    }
 
     private void DumpDiagnostics(IEnumerable<Diagnostic> diagnostics)
     {
