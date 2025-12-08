@@ -84,7 +84,7 @@ public sealed class Parser
         {
             decl = ParseSamplerState();
         }
-        var isFx10StateKeyword = startToken.Kind is "KeywordDepthStencilState" or "KeywordBlendState" or "KeywordRasterizerState" or "KeywordSamplerState10";
+        var isFx10StateKeyword = startToken.Kind is "KeywordDepthStencilState" or "KeywordBlendState" or "KeywordRasterizerState" or "KeywordSamplerState10" or "KeywordSamplerComparisonState";
         if (decl is null && isFx10StateKeyword && Peek(1) is { Kind: "Identifier" } && Peek(2) is { Kind: "OpenBrace" })
         {
             decl = ParseFx10StateObject(startToken.Kind);
@@ -1228,6 +1228,7 @@ public sealed class Parser
             "KeywordBlendState" => "BlendStateDeclaration",
             "KeywordRasterizerState" => "RasterizerStateDeclaration",
             "KeywordSamplerState10" => "SamplerState10Declaration",
+            "KeywordSamplerComparisonState" => "SamplerComparisonStateDeclaration",
             _ => "StateObjectDeclaration"
         };
 
@@ -1982,7 +1983,7 @@ public sealed class Parser
 
     private bool IsSamplerType(Token token) =>
         token.Kind.StartsWith("KeywordSampler", StringComparison.Ordinal)
-        && token.Kind is not "KeywordSamplerState" and not "KeywordSamplerState10";
+        && token.Kind is not "KeywordSamplerState" and not "KeywordSamplerState10" and not "KeywordSamplerComparisonState";
 
     private bool IsModifier(Token token) =>
         token.Kind is "KeywordStatic" or "KeywordConst" or "KeywordUniform" or "KeywordExtern" or "KeywordVolatile" ||

@@ -60,6 +60,7 @@ public static class HlslLexer
         ["samplerstate"] = "KeywordSamplerState10",
         ["texture"] = "KeywordTexture",
         ["sampler_state"] = "KeywordSamplerState",
+        ["samplercomparisonstate"] = "KeywordSamplerComparisonState",
         ["depthstencilstate"] = "KeywordDepthStencilState",
         ["blendstate"] = "KeywordBlendState",
         ["rasterizerstate"] = "KeywordRasterizerState",
