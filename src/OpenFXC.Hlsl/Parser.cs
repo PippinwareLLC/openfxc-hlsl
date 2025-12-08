@@ -1672,7 +1672,24 @@ public sealed class Parser
     {
         var next = Peek(1);
         var nextNext = Peek(2);
-        return next is not null && IsTypeLike(next) && nextNext?.Kind == "CloseParen";
+        var after = Peek(3);
+        if (next is null || nextNext?.Kind != "CloseParen")
+        {
+            return false;
+        }
+
+        if (!IsTypeLike(next))
+        {
+            return false;
+        }
+
+        // Require something expression-like after the cast, otherwise treat "(Identifier)" as grouping.
+        if (after is null || after.Kind is "Semicolon" or "CloseParen" or "CloseBrace" or "Comma")
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private Token Consume()
