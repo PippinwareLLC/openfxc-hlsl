@@ -55,6 +55,10 @@ public sealed record Diagnostic
 
     [JsonPropertyName("span")]
     public Span Span { get; init; } = new();
+
+    [JsonPropertyName("origin")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DiagnosticOrigin? Origin { get; init; }
 }
 
 public sealed record LexResult(
@@ -62,6 +66,10 @@ public sealed record LexResult(
     [property: JsonPropertyName("source")] SourceInfo Source,
     [property: JsonPropertyName("tokens")] Token[] Tokens,
     [property: JsonPropertyName("diagnostics")] Diagnostic[] Diagnostics);
+
+public sealed record DiagnosticOrigin(
+    [property: JsonPropertyName("fileName")] string FileName,
+    [property: JsonPropertyName("span")] Span Span);
 
 public sealed record AstChild
 {

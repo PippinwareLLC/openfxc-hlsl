@@ -9,11 +9,11 @@ internal sealed class Program
     private const int FormatVersion = 1;
 
     private static int Main(string[] args)
-    {
-        try
         {
-            if (args.Length == 0 || IsHelp(args[0]))
+            try
             {
+                if (args.Length == 0 || IsHelp(args[0]))
+                {
                 PrintUsage();
                 return args.Length == 0 ? 1 : 0;
             }
@@ -55,13 +55,14 @@ internal sealed class Program
             var length = preprocessed.Text.Length;
 
             var (tokens, lexDiagnostics) = HlslLexer.Lex(preprocessed.Text);
+            var mappedLexDiagnostics = preprocessed.SourceMap.AttachOrigins(lexDiagnostics);
             var preprocessorDiagnostics = preprocessed.Diagnostics.ToArray();
-            var combinedLexDiagnostics = preprocessorDiagnostics.Concat(lexDiagnostics).ToArray();
+            var combinedLexDiagnostics = preprocessorDiagnostics.Concat(mappedLexDiagnostics).ToArray();
 
             string json = command switch
             {
                 "lex" => Serialize(new LexResult(FormatVersion, new SourceInfo(fileName, length), tokens, combinedLexDiagnostics)),
-                "parse" => Serialize(BuildParseResult(fileName, length, tokens, lexDiagnostics, preprocessorDiagnostics)),
+                "parse" => Serialize(BuildParseResult(fileName, length, tokens, mappedLexDiagnostics, preprocessorDiagnostics, preprocessed.SourceMap)),
                 _ => throw new InvalidOperationException($"Unknown command '{command}'. Expected 'lex' or 'parse'.")
             };
 
@@ -188,10 +189,11 @@ internal sealed class Program
         return JsonSerializer.Serialize(value, options);
     }
 
-    private static ParseResult BuildParseResult(string fileName, int length, Token[] tokens, Diagnostic[] lexDiagnostics, Diagnostic[] preprocessorDiagnostics)
+    private static ParseResult BuildParseResult(string fileName, int length, Token[] tokens, Diagnostic[] lexDiagnostics, Diagnostic[] preprocessorDiagnostics, SourceMap sourceMap)
     {
         var (root, parseDiagnostics) = Parser.Parse(tokens, length);
-        var allDiagnostics = lexDiagnostics.Concat(parseDiagnostics).Concat(preprocessorDiagnostics).ToArray();
+        var mappedParseDiagnostics = sourceMap.AttachOrigins(parseDiagnostics);
+        var allDiagnostics = lexDiagnostics.Concat(mappedParseDiagnostics).Concat(preprocessorDiagnostics).ToArray();
 
         return new ParseResult(
             FormatVersion,

@@ -73,7 +73,8 @@ public class SampleSmokeTests
             });
 
         var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
-        var allLexDiagnostics = pre.Diagnostics.Concat(lexDiagnostics).ToArray();
+        var mappedLexDiagnostics = pre.SourceMap.AttachOrigins(lexDiagnostics);
+        var allLexDiagnostics = pre.Diagnostics.Concat(mappedLexDiagnostics).ToArray();
         Assert.NotEmpty(tokens);
         if (strict)
         {
@@ -81,15 +82,28 @@ public class SampleSmokeTests
         }
 
         var (root, parseDiagnostics) = Parser.Parse(tokens, pre.Text.Length);
+        var mappedParseDiagnostics = pre.SourceMap.AttachOrigins(parseDiagnostics);
+        DumpDiagnostics(allLexDiagnostics.Concat(mappedParseDiagnostics));
         Assert.Equal("CompilationUnit", root.Kind);
         Assert.Equal(0, root.Span.Start);
         Assert.Equal(pre.Text.Length, root.Span.End);
         if (strict)
         {
-            Assert.Empty(parseDiagnostics);
+            Assert.Empty(mappedParseDiagnostics);
         }
     }
 
     private static bool IsStrictSampleSweep() =>
         string.Equals(Environment.GetEnvironmentVariable("OPENFXC_STRICT_SAMPLES"), "1", StringComparison.Ordinal);
+
+    private void DumpDiagnostics(IEnumerable<Diagnostic> diagnostics)
+    {
+        foreach (var diag in diagnostics)
+        {
+            var origin = diag.Origin is null
+                ? string.Empty
+                : $" (origin: {diag.Origin.FileName}@{diag.Origin.Span.Start}-{diag.Origin.Span.End})";
+            _output.WriteLine($"[diag] {diag.Id} {diag.Message} span {diag.Span.Start}-{diag.Span.End}{origin}");
+        }
+    }
 }

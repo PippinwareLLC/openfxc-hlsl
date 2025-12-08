@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace OpenFXC.Hlsl;
 
@@ -14,7 +15,7 @@ public sealed record PreprocessorOptions
         new Dictionary<string, string?>(StringComparer.Ordinal);
 }
 
-public sealed record PreprocessResult(string Text, Diagnostic[] Diagnostics);
+public sealed record PreprocessResult(string Text, Diagnostic[] Diagnostics, SourceMap SourceMap);
 
 /// <summary>
 /// Lightweight preprocessor that handles includes, object/function-like macros, and conditional
@@ -36,7 +37,7 @@ public static class Preprocessor
         context.ProcessFile(text, options.FilePath ?? "stdin", builder);
         context.Complete(builder.Length);
 
-        return new PreprocessResult(builder.ToString(), context.Diagnostics.ToArray());
+        return new PreprocessResult(builder.ToString(), context.Diagnostics.ToArray(), context.BuildSourceMap());
     }
 
     private sealed class PreprocessorContext
@@ -47,6 +48,8 @@ public static class Preprocessor
         private readonly List<Diagnostic> _diagnostics = new();
         private readonly PreprocessorOptions _options;
         private readonly List<ConditionalFrame> _conditions = new();
+        private readonly List<SourceSegment> _sourceSegments = new();
+        private string CurrentPath => _includeStack.LastOrDefault() ?? (_options.FilePath ?? "stdin");
 
         public PreprocessorContext(PreprocessorOptions options)
         {
@@ -69,6 +72,8 @@ public static class Preprocessor
 
         public bool IsMacroDefined(string name) => _macros.ContainsKey(name);
 
+        public SourceMap BuildSourceMap() => new(_sourceSegments);
+
         public void Complete(int outputLength)
         {
             if (_conditions.Count > 0)
@@ -77,7 +82,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticUnterminatedIf,
                     Message = "Unterminated conditional block.",
-                    Span = new Span { Start = outputLength, End = outputLength }
+                    Span = new Span { Start = outputLength, End = outputLength },
+                    Origin = new DiagnosticOrigin(CurrentPath, new Span { Start = outputLength, End = outputLength })
                 });
             }
         }
@@ -95,7 +101,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticIncludeCycle,
                     Message = $"Include cycle detected for '{path}'.",
-                    Span = new Span { Start = output.Length, End = output.Length }
+                    Span = new Span { Start = output.Length, End = output.Length },
+                    Origin = new DiagnosticOrigin(path, new Span { Start = 0, End = 0 })
                 });
                 return;
             }
@@ -118,12 +125,15 @@ public static class Preprocessor
                 if (!IsActive)
                 {
                     output.Append(newline);
+                    AddSegment(path, lineStart, line.Length + newline.Length, output.Length - newline.Length, newline.Length);
                     continue;
                 }
 
-                var expanded = ExpandMacros(line, output.Length, allowDirectives: false);
+                var outputStart = output.Length;
+                var expanded = ExpandMacros(line, outputStart, allowDirectives: false);
                 output.Append(expanded);
                 output.Append(newline);
+                AddSegment(path, lineStart, line.Length + newline.Length, outputStart, expanded.Length + newline.Length);
             }
 
             _includeStack.Remove(path);
@@ -164,6 +174,8 @@ public static class Preprocessor
             var keyword = ReadIdentifier(directive, out var rest);
             var keywordText = keyword.ToString().ToLowerInvariant();
 
+            var outputStart = output.Length;
+            var mapDirective = keywordText != "include" || !IsActive;
             switch (keywordText)
             {
                 case "include":
@@ -214,6 +226,12 @@ public static class Preprocessor
                     output.Append(newline);
                     break;
             }
+
+            var outputEnd = output.Length;
+            if (mapDirective && outputEnd > outputStart)
+            {
+                AddSegment(currentPath, lineStart, line.Length + newline.Length, outputStart, outputEnd - outputStart);
+            }
         }
 
         private void HandleInclude(string currentPath, int lineStart, ReadOnlySpan<char> rest, string newline, StringBuilder output)
@@ -231,7 +249,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticMissingInclude,
                     Message = "Missing include path.",
-                    Span = new Span { Start = output.Length, End = output.Length }
+                    Span = new Span { Start = output.Length, End = output.Length },
+                    Origin = new DiagnosticOrigin(currentPath, new Span { Start = lineStart, End = lineStart })
                 });
                 output.Append(newline);
                 return;
@@ -244,7 +263,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticMissingInclude,
                     Message = "Include path was not well-formed.",
-                    Span = new Span { Start = output.Length, End = output.Length }
+                    Span = new Span { Start = output.Length, End = output.Length },
+                    Origin = new DiagnosticOrigin(currentPath, new Span { Start = lineStart, End = lineStart })
                 });
                 output.Append(newline);
                 return;
@@ -257,7 +277,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticMissingInclude,
                     Message = $"Could not resolve include '{path}'.",
-                    Span = new Span { Start = output.Length, End = output.Length }
+                    Span = new Span { Start = output.Length, End = output.Length },
+                    Origin = new DiagnosticOrigin(currentPath, new Span { Start = lineStart, End = lineStart })
                 });
                 output.Append(newline);
                 return;
@@ -466,7 +487,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticUnexpectedEndif,
                     Message = "Encountered #elif without matching #if.",
-                    Span = new Span { Start = 0, End = 0 }
+                    Span = new Span { Start = 0, End = 0 },
+                    Origin = new DiagnosticOrigin(CurrentPath, new Span { Start = 0, End = 0 })
                 });
                 return;
             }
@@ -501,7 +523,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticUnexpectedEndif,
                     Message = "Encountered #else without matching #if.",
-                    Span = new Span { Start = 0, End = 0 }
+                    Span = new Span { Start = 0, End = 0 },
+                    Origin = new DiagnosticOrigin(CurrentPath, new Span { Start = 0, End = 0 })
                 });
                 return;
             }
@@ -530,7 +553,8 @@ public static class Preprocessor
                 {
                     Id = DiagnosticUnexpectedEndif,
                     Message = "Encountered #endif without matching #if.",
-                    Span = new Span { Start = outputLength, End = outputLength }
+                    Span = new Span { Start = outputLength, End = outputLength },
+                    Origin = new DiagnosticOrigin(CurrentPath, new Span { Start = outputLength, End = outputLength })
                 });
                 return;
             }
@@ -553,8 +577,22 @@ public static class Preprocessor
             {
                 Id = "HLSL2006",
                 Message = $"#error: {directive}",
-                Span = new Span { Start = lineStart, End = lineStart }
+                Span = new Span { Start = lineStart, End = lineStart },
+                Origin = new DiagnosticOrigin(_includeStack.LastOrDefault() ?? string.Empty, new Span { Start = lineStart, End = lineStart })
             });
+        }
+
+        private void AddSegment(string path, int inputStart, int inputLength, int outputStart, int outputLength)
+        {
+            if (outputLength <= 0)
+            {
+                return;
+            }
+
+            _sourceSegments.Add(new SourceSegment(
+                new Span { Start = outputStart, End = outputStart + outputLength },
+                path,
+                new Span { Start = inputStart, End = inputStart + inputLength }));
         }
 
         private bool EvaluateExpression(ReadOnlySpan<char> expression)
@@ -707,7 +745,8 @@ public static class Preprocessor
             {
                 Id = DiagnosticMacroArgument,
                 Message = "Unterminated macro argument list.",
-                Span = new Span { Start = diagnosticBase, End = diagnosticBase }
+                Span = new Span { Start = diagnosticBase, End = diagnosticBase },
+                Origin = new DiagnosticOrigin(CurrentPath, new Span { Start = diagnosticBase, End = diagnosticBase })
             });
 
             return false;
