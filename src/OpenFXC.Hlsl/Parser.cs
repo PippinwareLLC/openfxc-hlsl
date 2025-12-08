@@ -611,11 +611,42 @@ public sealed class Parser
             ConsumeTemplateArguments();
         }
 
+        var arrayChildren = new List<AstChild>();
+        var typeEnd = typeTok.Span.End;
+        while (Match("OpenBracket"))
+        {
+            var arrStart = Consume().Span.Start;
+            var sizeExpr = ParseExpression();
+            ConsumeExpected("CloseBracket");
+            var arrEnd = sizeExpr?.Span.End ?? CurrentSpan().End;
+            typeEnd = arrEnd;
+            arrayChildren.Add(new AstChild
+            {
+                Role = "array",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "ArrayDeclarator",
+                    Span = new Span { Start = arrStart, End = arrEnd },
+                    Children = sizeExpr is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "size", Node = sizeExpr } }
+                }
+            });
+        }
+
         ConsumeExpected("CloseParen");
         var operand = ParseUnary();
         var end = operand?.Span.End ?? CurrentSpan().End;
 
-        var typeNode = Leaf("Type", typeTok);
+        var typeSpan = new Span { Start = typeTok.Span.Start, End = typeEnd };
+        var typeNode = arrayChildren.Count == 0
+            ? Leaf("Type", typeTok)
+            : new AstNode
+            {
+                Id = NextId(),
+                Kind = "Type",
+                Span = typeSpan,
+                Children = new[] { new AstChild { Role = "token", Node = Leaf("TypeToken", typeTok) } }.Concat(arrayChildren).ToArray()
+            };
         var children = new List<AstChild> { new AstChild { Role = "type", Node = typeNode } };
         if (operand is not null)
         {
