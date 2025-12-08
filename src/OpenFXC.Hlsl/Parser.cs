@@ -294,6 +294,29 @@ public sealed class Parser
                 declChildren.Add(annotation);
             }
 
+            if (Match("Colon"))
+            {
+                var colon = Consume();
+                var semTokens = new List<Token>();
+                while (!IsEnd && !Match("Semicolon") && !Match("Equals") && !Match("Comma") && !Match("Less") && !Match("OpenBrace"))
+                {
+                    semTokens.Add(Consume());
+                }
+
+                var semEnd = semTokens.Count > 0 ? semTokens[^1].Span.End : colon.Span.End;
+                declChildren.Add(new AstChild
+                {
+                    Role = "semantic",
+                    Node = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "Semantic",
+                        Span = new Span { Start = colon.Span.Start, End = semEnd },
+                        Children = semTokens.Select(t => new AstChild { Role = "token", Node = Leaf("Token", t) }).ToArray()
+                    }
+                });
+            }
+
             while (Match("Less"))
             {
                 var annSpan = ConsumeAngleBlockSpan();
