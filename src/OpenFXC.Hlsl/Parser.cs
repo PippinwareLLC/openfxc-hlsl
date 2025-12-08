@@ -72,7 +72,7 @@ public sealed class Parser
         {
             decl = ParseStructLike(startToken.Kind);
         }
-        else if (startToken.Kind is "KeywordTechnique" or "KeywordTechnique10")
+        else if (startToken.Kind is "KeywordTechnique" or "KeywordTechnique10" or "KeywordTechnique11")
         {
             decl = ParseTechnique(startToken.Kind);
         }
@@ -1446,7 +1446,12 @@ public sealed class Parser
         return new AstNode
         {
             Id = NextId(),
-            Kind = kind == "KeywordTechnique10" ? "Technique10Declaration" : "TechniqueDeclaration",
+            Kind = kind switch
+            {
+                "KeywordTechnique10" => "Technique10Declaration",
+                "KeywordTechnique11" => "Technique11Declaration",
+                _ => "TechniqueDeclaration"
+            },
             Span = new Span { Start = start, End = bodyEnd },
             Children = children.ToArray()
         };

@@ -80,8 +80,9 @@ public static class HlslLexer
         ["return"] = "KeywordReturn",
         ["discard"] = "KeywordDiscard",
         ["technique"] = "KeywordTechnique",
-        ["pass"] = "KeywordPass",
         ["technique10"] = "KeywordTechnique10",
+        ["technique11"] = "KeywordTechnique11",
+        ["pass"] = "KeywordPass",
         ["asm"] = "KeywordAsm",
     };
 

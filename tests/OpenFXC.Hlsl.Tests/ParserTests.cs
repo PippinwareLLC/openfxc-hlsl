@@ -123,6 +123,18 @@ public class ParserTests
     }
 
     [Fact]
+    public void ParseTechnique11()
+    {
+        var path = Path.Combine(RepoRoot, "tests", "fixtures", "parse-technique11.hlsl");
+        var text = File.ReadAllText(path);
+        var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
+        var (_, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+
+        Assert.Empty(lexDiagnostics);
+        Assert.Empty(parseDiagnostics);
+    }
+
+    [Fact]
     public void ParseFxTechniqueAndPasses()
     {
         var path = Path.Combine(RepoRoot, "tests", "fixtures", "parse-fx.hlsl");
