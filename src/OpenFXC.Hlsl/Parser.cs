@@ -250,92 +250,145 @@ public sealed class Parser
         }
         children.Add(new AstChild { Role = "type", Node = typeNode });
 
-        Token identTok;
-        if (Match("Less"))
+        List<AstChild> ParseDeclarator(out Span span)
         {
-            ConsumeTemplateArguments();
-        }
-
-        if (Match("Identifier"))
-        {
-            identTok = Consume();
-        }
-        else
-        {
-            identTok = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
-            AddDiagnostic("HLSL1001", "Expected identifier in declaration.", CurrentSpan());
-        }
-        children.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", identTok) });
-
-        while (Match("OpenBracket"))
-        {
-            var startArr = Consume().Span.Start;
-            var sizeExpr = ParseExpression();
-            ConsumeExpected("CloseBracket");
-            var endArr = sizeExpr?.Span.End ?? CurrentSpan().End;
-            children.Add(new AstChild
+            var declChildren = new List<AstChild>();
+            Token identTok;
+            if (Match("Less"))
             {
-                Role = "array",
-                Node = new AstNode
-                {
-                    Id = NextId(),
-                    Kind = "ArrayDeclarator",
-                    Span = new Span { Start = startArr, End = endArr },
-                    Children = sizeExpr is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "size", Node = sizeExpr } }
-                }
-            });
-        }
-
-        foreach (var annotation in ParseAnnotations(new[] { "Semicolon", "Equals" }))
-        {
-            children.Add(annotation);
-        }
-
-        // Optional initializer: = expression
-        if (Match("Equals"))
-        {
-            Consume(); // =
-            AstNode? initializer = null;
-            if (Match("KeywordAsm"))
-            {
-                initializer = ParseAsmBlock();
+                ConsumeTemplateArguments();
             }
-            else if (typeTok.Kind == "KeywordSampler" && Match("KeywordSamplerState"))
+
+            if (Match("Identifier"))
             {
-                initializer = ParseInlineSamplerState();
-            }
-            else if (Match("OpenBrace"))
-            {
-                var span = ConsumeBlockSpan();
-                initializer = new AstNode
-                {
-                    Id = NextId(),
-                    Kind = "InitializerList",
-                    Span = span,
-                    Children = Array.Empty<AstChild>()
-                };
+                identTok = Consume();
             }
             else
             {
-                initializer = ParseExpression();
+                identTok = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+                AddDiagnostic("HLSL1001", "Expected identifier in declaration.", CurrentSpan());
+            }
+            declChildren.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", identTok) });
+
+            while (Match("OpenBracket"))
+            {
+                var startArr = Consume().Span.Start;
+                var sizeExpr = ParseExpression();
+                ConsumeExpected("CloseBracket");
+                var endArr = sizeExpr?.Span.End ?? CurrentSpan().End;
+                declChildren.Add(new AstChild
+                {
+                    Role = "array",
+                    Node = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "ArrayDeclarator",
+                        Span = new Span { Start = startArr, End = endArr },
+                        Children = sizeExpr is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "size", Node = sizeExpr } }
+                    }
+                });
             }
 
-            if (initializer is not null)
+            foreach (var annotation in ParseAnnotations(new[] { "Semicolon", "Equals", "Comma" }))
             {
-                children.Add(new AstChild { Role = "initializer", Node = initializer });
+                declChildren.Add(annotation);
             }
+
+            if (Match("Equals"))
+            {
+                Consume(); // =
+                AstNode? initializer = null;
+                if (Match("KeywordAsm"))
+                {
+                    initializer = ParseAsmBlock();
+                }
+                else if (typeTok.Kind == "KeywordSampler" && Match("KeywordSamplerState"))
+                {
+                    initializer = ParseInlineSamplerState();
+                }
+                else if (Match("OpenBrace"))
+                {
+                    var spanList = ConsumeBlockSpan();
+                    initializer = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "InitializerList",
+                        Span = spanList,
+                        Children = Array.Empty<AstChild>()
+                    };
+                }
+                else
+                {
+                    initializer = ParseExpression();
+                }
+
+                if (initializer is not null)
+                {
+                    declChildren.Add(new AstChild { Role = "initializer", Node = initializer });
+                }
+            }
+
+            var declEnd = declChildren.LastOrDefault()?.Node.Span.End ?? identTok.Span.End;
+            span = new Span { Start = identTok.Span.Start, End = declEnd };
+            return declChildren;
         }
 
-        ConsumeExpected("Semicolon");
+        var firstDeclChildren = ParseDeclarator(out var firstSpan);
 
-        var end = children.Last().Node.Span.End;
-        return new AstNode
+        if (Match("Comma"))
         {
-            Id = NextId(),
-            Kind = "VariableDeclaration",
-            Span = new Span { Start = start, End = end },
-            Children = children.ToArray()
-        };
+            var declarators = new List<AstNode>
+            {
+                new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "VariableDeclarator",
+                    Span = firstSpan,
+                    Children = firstDeclChildren.ToArray()
+                }
+            };
+
+            while (Match("Comma"))
+            {
+                Consume();
+                var nextDeclChildren = ParseDeclarator(out var declSpan);
+                declarators.Add(new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "VariableDeclarator",
+                    Span = declSpan,
+                    Children = nextDeclChildren.ToArray()
+                });
+            }
+
+            var semi = ConsumeExpected("Semicolon");
+            var end = semi.Kind == "Semicolon" ? declarators.Last().Span.End : semi.Span.End;
+            children.AddRange(declarators.Select(d => new AstChild { Role = "declarator", Node = d }));
+
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = "VariableDeclaration",
+                Span = new Span { Start = start, End = end },
+                Children = children.ToArray()
+            };
+        }
+        else
+        {
+            var semi = ConsumeExpected("Semicolon");
+            var end = semi.Kind == "Semicolon"
+                ? firstDeclChildren.LastOrDefault()?.Node.Span.End ?? typeNode.Span.End
+                : semi.Span.End;
+            children.AddRange(firstDeclChildren);
+
+            return new AstNode
+            {
+                Id = NextId(),
+                Kind = "VariableDeclaration",
+                Span = new Span { Start = start, End = end },
+                Children = children.ToArray()
+            };
+        }
     }
 
     private AstNode ParseBlock()

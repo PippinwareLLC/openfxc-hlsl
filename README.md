@@ -17,6 +17,7 @@ This project was created by peeling off the commits from Pippinware LLCs' in-pro
 5. Command-line defines: use `-D NAME` or `-D NAME=VALUE` (repeatable) to seed macros before preprocessing.
 
 Current output includes full lexing for SM1-SM5 and FX constructs; parsing now covers era-specific declarations (samplers/sampler_state, semantics/register/bindings, cbuffer/tbuffer, class/interface/struct bodies, typedefs), FX technique/pass bodies (syntax-only), inline asm blocks, postfix/prefix ++/-- and compound assignments, cast expressions, FX resource bindings (`Texture[0] = <TextureName>;`), and FX9/FX10 compile invocations (`VertexShader = compile vs_1_1 Foo();`) with a `CompilationUnit` AST and diagnostics. Schema matches `docs/TDD.md`.
+Variable declarations support multiple declarators per statement (e.g., `float2 dx, dy;`) in addition to single-name forms.
 
 ## Testing
 - Run all tests: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj`
