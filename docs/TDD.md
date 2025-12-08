@@ -310,6 +310,7 @@ For full SM1–SM5 syntax compatibility, create tests for each major syntax cate
 * `pass`
 * `CompileShader(vs_2_0, MainVS())`
 * `SetPixelShader(...)`
+* FX10 state objects: `DepthStencilState`, `BlendState`, `RasterizerState`, `SamplerState` (FX10 form) with property bodies and usage via `Set*State(...)` inside `technique10` passes
 
 These must **parse**, even if semantics will later reject them.
 

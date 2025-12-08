@@ -88,6 +88,15 @@ public sealed class Parser
             return ParseSamplerState();
         }
 
+        // FX10 state objects
+        if (startToken.Kind is "KeywordDepthStencilState" or "KeywordBlendState" or "KeywordRasterizerState" or "KeywordSamplerState10")
+        {
+            if (Peek(1) is { Kind: "Identifier" } && Peek(2) is { Kind: "OpenBrace" })
+            {
+                return ParseFx10StateObject(startToken.Kind);
+            }
+        }
+
         // Heuristic: type identifier ... if followed by "(" treat as function, else variable.
         if (IsTypeLike(startToken))
         {
@@ -662,6 +671,61 @@ public sealed class Parser
         {
             Id = NextId(),
             Kind = "SamplerStateDeclaration",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
+    private AstNode ParseFx10StateObject(string keywordKind)
+    {
+        var start = Consume().Span.Start; // keyword
+        var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
+        var children = new List<AstChild>
+        {
+            new AstChild { Role = "identifier", Node = Leaf("Identifier", name) }
+        };
+
+        Span bodySpan;
+        if (Match("OpenBrace"))
+        {
+            bodySpan = ConsumeBlockSpan();
+            children.Add(new AstChild
+            {
+                Role = "body",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "StateObjectBody",
+                    Span = bodySpan,
+                    Children = Array.Empty<AstChild>()
+                }
+            });
+        }
+        else
+        {
+            AddDiagnostic("HLSL1002", "Expected '{' to start state object body.", CurrentSpan());
+            bodySpan = CurrentSpan();
+        }
+
+        if (Match("Semicolon"))
+        {
+            Consume();
+        }
+
+        var end = children.Last().Node.Span.End;
+        var declKind = keywordKind switch
+        {
+            "KeywordDepthStencilState" => "DepthStencilStateDeclaration",
+            "KeywordBlendState" => "BlendStateDeclaration",
+            "KeywordRasterizerState" => "RasterizerStateDeclaration",
+            "KeywordSamplerState10" => "SamplerState10Declaration",
+            _ => "StateObjectDeclaration"
+        };
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = declKind,
             Span = new Span { Start = start, End = end },
             Children = children.ToArray()
         };

@@ -1672,7 +1672,7 @@
       "trailingTrivia": []
     },
     {
-      "kind": "Identifier",
+      "kind": "KeywordSamplerState10",
       "text": "SamplerState",
       "span": {
         "start": 116,
