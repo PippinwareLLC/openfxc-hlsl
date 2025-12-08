@@ -19,6 +19,7 @@ This project was created by peeling off the commits from Pippinware LLCs' in-pro
 
 Current output includes full lexing for SM1-SM5 and FX constructs; parsing now covers era-specific declarations (samplers/sampler_state, semantics/register/bindings, cbuffer/tbuffer, class/interface/struct bodies, typedefs), FX technique/pass bodies (syntax-only), inline asm blocks, postfix/prefix ++/-- and compound assignments, cast and conditional (`?:`) expressions, FX resource bindings (`Texture[0] = <TextureName>;`), FX9/FX10/FX11 technique forms, and compile invocations (`VertexShader = compile vs_1_1 Foo();`) with a `CompilationUnit` AST and diagnostics. Schema matches `docs/TDD.md`. C-style integer modifiers (`unsigned`/`signed`/`long`/`short`) are understood in declarations and loop initializers for DXSDK parity.
 Variable declarations support multiple declarators per statement (e.g., `float2 dx, dy;`) in addition to single-name forms, and inline `sampler_state` initializers work for all sampler types (sampler, sampler1D/2D/3D/CUBE).
+Keywords are matched case-insensitively while preserving original spelling; mixed-case `Half` stays an identifier so FXC-style constants (e.g., `HalfVector`) remain valid.
 
 ## Testing
 - Run all tests: `dotnet test tests/OpenFXC.Hlsl.Tests/OpenFXC.Hlsl.Tests.csproj`
