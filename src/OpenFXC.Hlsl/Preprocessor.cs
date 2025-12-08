@@ -402,6 +402,8 @@ public static class Preprocessor
                 body = afterName.ToString().TrimStart();
             }
 
+            body = StripLineComment(body).TrimEnd();
+
             _macros[name] = new MacroDefinition(name, parameters, body);
         }
 
@@ -434,6 +436,26 @@ public static class Preprocessor
             var condition = parentActive && (isNegated ? !defined : defined);
 
             _conditions.Add(new ConditionalFrame(parentActive, condition, condition));
+        }
+
+        private static string StripLineComment(string text)
+        {
+            var inString = false;
+            for (var i = 0; i < text.Length - 1; i++)
+            {
+                var c = text[i];
+                if (c == '"')
+                {
+                    inString = !inString;
+                }
+
+                if (!inString && c == '/' && text[i + 1] == '/')
+                {
+                    return text.Substring(0, i);
+                }
+            }
+
+            return text;
         }
 
         private void HandleElif(ReadOnlySpan<char> rest)
