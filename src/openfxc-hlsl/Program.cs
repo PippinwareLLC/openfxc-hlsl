@@ -22,7 +22,7 @@ internal sealed class Program
             var options = ParseArgs(args[1..]);
 
             var input = ReadInput(options.InputPath);
-            var fileName = options.InputPath is null ? "stdin" : Path.GetFileName(options.InputPath);
+            var fileName = options.InputPath is null ? "stdin" : Path.GetFullPath(options.InputPath);
             var includeDirs = new List<string>(options.IncludeDirectories);
             if (options.InputPath is not null)
             {

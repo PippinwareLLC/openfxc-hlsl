@@ -2,12 +2,19 @@ using OpenFXC.Hlsl;
 using Xunit;
 using System;
 using System.Linq;
+using Xunit.Abstractions;
 
 namespace OpenFXC.Hlsl.Tests;
 
 public class SampleSmokeTests
 {
+    private readonly ITestOutputHelper _output;
     private static readonly string RepoRoot = TestPaths.FindRepoRoot();
+
+    public SampleSmokeTests(ITestOutputHelper output)
+    {
+        _output = output;
+    }
 
     public static IEnumerable<object[]> SampleFiles =>
         Directory.EnumerateFiles(Path.Combine(RepoRoot, "samples"), "*.fx", SearchOption.AllDirectories)
@@ -23,6 +30,7 @@ public class SampleSmokeTests
     public void LexAndParseSamplesProduceCompilationUnit(string path)
     {
         var strict = IsStrictSampleSweep();
+        _output.WriteLine($"[sample] {path}");
         var text = File.ReadAllText(path);
 
         var pre = Preprocessor.Preprocess(
@@ -53,6 +61,7 @@ public class SampleSmokeTests
     public void AllFxFilesLexAndParse(string path)
     {
         var strict = IsStrictSampleSweep();
+        _output.WriteLine($"[sample] {path}");
         var text = File.ReadAllText(path);
 
         var pre = Preprocessor.Preprocess(

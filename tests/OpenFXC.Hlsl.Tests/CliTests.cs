@@ -21,7 +21,7 @@ public class CliTests
         var root = doc.RootElement;
 
         Assert.Equal(ExitSuccess, 0);
-        Assert.Equal("basic-sm2.hlsl", root.GetProperty("source").GetProperty("fileName").GetString());
+        Assert.Equal(Path.GetFullPath(fixture), root.GetProperty("source").GetProperty("fileName").GetString());
         Assert.True(root.GetProperty("tokens").GetArrayLength() > 0);
     }
 
