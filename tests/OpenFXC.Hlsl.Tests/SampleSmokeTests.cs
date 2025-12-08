@@ -42,17 +42,20 @@ public class SampleSmokeTests
             });
 
         var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
-        var allLexDiagnostics = pre.Diagnostics.Concat(lexDiagnostics).ToArray();
+        var mappedLexDiagnostics = pre.SourceMap.AttachOrigins(lexDiagnostics);
+        var allLexDiagnostics = pre.Diagnostics.Concat(mappedLexDiagnostics).ToArray();
         Assert.NotEmpty(tokens);
 
         var (root, parseDiagnostics) = Parser.Parse(tokens, pre.Text.Length);
+        var mappedParseDiagnostics = pre.SourceMap.AttachOrigins(parseDiagnostics);
+        DumpDiagnostics(allLexDiagnostics.Concat(mappedParseDiagnostics));
         Assert.Equal("CompilationUnit", root.Kind);
         Assert.Equal(0, root.Span.Start);
         Assert.Equal(pre.Text.Length, root.Span.End);
         if (strict)
         {
             Assert.Empty(allLexDiagnostics);
-            Assert.Empty(parseDiagnostics);
+            Assert.Empty(mappedParseDiagnostics);
         }
     }
 
