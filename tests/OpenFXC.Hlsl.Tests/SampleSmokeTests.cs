@@ -1,5 +1,6 @@
 using OpenFXC.Hlsl;
 using Xunit;
+using System;
 using System.Linq;
 
 namespace OpenFXC.Hlsl.Tests;
@@ -21,6 +22,7 @@ public class SampleSmokeTests
     [MemberData(nameof(SampleFiles))]
     public void LexAndParseSamplesProduceCompilationUnit(string path)
     {
+        var strict = IsStrictSampleSweep();
         var text = File.ReadAllText(path);
 
         var pre = Preprocessor.Preprocess(
@@ -39,16 +41,18 @@ public class SampleSmokeTests
         Assert.Equal("CompilationUnit", root.Kind);
         Assert.Equal(0, root.Span.Start);
         Assert.Equal(pre.Text.Length, root.Span.End);
-
-        // Parser diagnostics may exist for unsupported FX syntax, but tree must still be produced.
-        Assert.NotNull(parseDiagnostics);
-        Assert.NotNull(allLexDiagnostics);
+        if (strict)
+        {
+            Assert.Empty(allLexDiagnostics);
+            Assert.Empty(parseDiagnostics);
+        }
     }
 
     [Theory]
     [MemberData(nameof(AllFxFiles))]
     public void AllFxFilesLexAndParse(string path)
     {
+        var strict = IsStrictSampleSweep();
         var text = File.ReadAllText(path);
 
         var pre = Preprocessor.Preprocess(
@@ -62,12 +66,21 @@ public class SampleSmokeTests
         var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
         var allLexDiagnostics = pre.Diagnostics.Concat(lexDiagnostics).ToArray();
         Assert.NotEmpty(tokens);
-        Assert.NotNull(allLexDiagnostics);
+        if (strict)
+        {
+            Assert.Empty(allLexDiagnostics);
+        }
 
         var (root, parseDiagnostics) = Parser.Parse(tokens, pre.Text.Length);
         Assert.Equal("CompilationUnit", root.Kind);
         Assert.Equal(0, root.Span.Start);
         Assert.Equal(pre.Text.Length, root.Span.End);
-        Assert.NotNull(parseDiagnostics);
+        if (strict)
+        {
+            Assert.Empty(parseDiagnostics);
+        }
     }
+
+    private static bool IsStrictSampleSweep() =>
+        string.Equals(Environment.GetEnvironmentVariable("OPENFXC_STRICT_SAMPLES"), "1", StringComparison.Ordinal);
 }
