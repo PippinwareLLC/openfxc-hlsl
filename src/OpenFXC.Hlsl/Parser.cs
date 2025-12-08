@@ -286,6 +286,17 @@ public sealed class Parser
             {
                 initializer = ParseInlineSamplerState();
             }
+            else if (Match("OpenBrace"))
+            {
+                var span = ConsumeBlockSpan();
+                initializer = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "InitializerList",
+                    Span = span,
+                    Children = Array.Empty<AstChild>()
+                };
+            }
             else
             {
                 initializer = ParseExpression();
@@ -392,6 +403,121 @@ public sealed class Parser
             Kind = "SamplerStateInitializer",
             Span = new Span { Start = start, End = bodySpan.End },
             Children = Array.Empty<AstChild>()
+        };
+    }
+
+    private AstNode ParseCompileExpression()
+    {
+        var compileTok = ConsumeExpected("Identifier");
+        var children = new List<AstChild>
+        {
+            new AstChild { Role = "keyword", Node = Leaf("Identifier", compileTok) }
+        };
+
+        Token profileTok;
+        if (Match("Identifier"))
+        {
+            profileTok = Consume();
+        }
+        else
+        {
+            profileTok = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+            AddDiagnostic("HLSL1001", "Expected profile after 'compile'.", CurrentSpan());
+        }
+        children.Add(new AstChild { Role = "profile", Node = Leaf("Identifier", profileTok) });
+
+        AstNode entryNode;
+        if (Match("Identifier"))
+        {
+            entryNode = Leaf("Identifier", Consume());
+        }
+        else
+        {
+            var missing = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+            entryNode = Leaf("Identifier", missing);
+            AddDiagnostic("HLSL1001", "Expected entry identifier after profile.", CurrentSpan());
+        }
+
+        if (Match("OpenParen"))
+        {
+            var args = new List<AstChild>();
+            Consume();
+            while (!IsEnd && !Match("CloseParen"))
+            {
+                var argExpr = ParseExpression();
+                if (argExpr is not null)
+                {
+                    args.Add(new AstChild { Role = "argument", Node = argExpr });
+                }
+                if (Match("Comma"))
+                {
+                    Consume();
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            ConsumeExpected("CloseParen");
+
+            entryNode = new AstNode
+            {
+                Id = NextId(),
+                Kind = "CallExpression",
+                Span = new Span { Start = entryNode.Span.Start, End = CurrentSpan().End },
+                Children = new[] { new AstChild { Role = "callee", Node = entryNode } }.Concat(args).ToArray()
+            };
+        }
+
+        var end = entryNode.Span.End;
+        children.Add(new AstChild { Role = "entry", Node = entryNode });
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "CompileExpression",
+            Span = new Span { Start = compileTok.Span.Start, End = end },
+            Children = children.ToArray()
+        };
+    }
+
+    private AstNode ParseCastExpression()
+    {
+        var start = ConsumeExpected("OpenParen").Span.Start;
+        Token typeTok;
+        if (Current is not null && IsTypeLike(Current))
+        {
+            typeTok = Consume();
+        }
+        else
+        {
+            typeTok = new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
+            AddDiagnostic("HLSL1001", "Expected type in cast.", CurrentSpan());
+        }
+
+        if (Match("Less"))
+        {
+            ConsumeTemplateArguments();
+        }
+
+        ConsumeExpected("CloseParen");
+        var operand = ParseUnary();
+        var end = operand?.Span.End ?? CurrentSpan().End;
+
+        var typeNode = Leaf("Type", typeTok);
+        var children = new List<AstChild> { new AstChild { Role = "type", Node = typeNode } };
+        if (operand is not null)
+        {
+            children.Add(new AstChild { Role = "operand", Node = operand });
+        }
+
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "CastExpression",
+            Span = new Span { Start = start, End = end },
+            Children = children.ToArray()
         };
     }
 
@@ -639,9 +765,16 @@ public sealed class Parser
         ConsumeExpected("OpenParen");
         while (!IsEnd && !Match("CloseParen"))
         {
-            if (IsTypeLike(Current!))
+            var paramStart = CurrentSpan().Start;
+            var modifiers = new List<Token>();
+            while (!IsEnd && IsParameterModifier(Current!))
             {
-                var typeTok = Consume();
+                modifiers.Add(Consume());
+            }
+
+            if (!IsEnd && IsTypeLike(Current!))
+            {
+                var typeTok = Consume(); // type
                 if (Match("Less"))
                 {
                     ConsumeTemplateArguments();
@@ -650,11 +783,42 @@ public sealed class Parser
                 var identTok = Match("Identifier")
                     ? Consume()
                     : new Token { Kind = "Identifier", Text = string.Empty, Span = CurrentSpan(), LeadingTrivia = Array.Empty<Trivia>(), TrailingTrivia = Array.Empty<Trivia>() };
-                var children = new List<AstChild>
+                var children = new List<AstChild>();
+
+                var typeNode = Leaf("Type", typeTok);
+                if (modifiers.Count > 0)
                 {
-                    new AstChild { Role = "type", Node = Leaf("Type", typeTok) },
-                    new AstChild { Role = "identifier", Node = Leaf("Identifier", identTok) }
-                };
+                    var typeSpan = new Span { Start = modifiers[0].Span.Start, End = typeTok.Span.End };
+                    typeNode = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "Type",
+                        Span = typeSpan,
+                        Children = modifiers.Select(m => new AstChild { Role = "modifier", Node = Leaf("Modifier", m) }).ToArray()
+                    };
+                }
+
+                children.Add(new AstChild { Role = "type", Node = typeNode });
+                children.Add(new AstChild { Role = "identifier", Node = Leaf("Identifier", identTok) });
+
+                while (Match("OpenBracket"))
+                {
+                    var arrStart = Consume().Span.Start;
+                    var sizeExpr = ParseExpression();
+                    ConsumeExpected("CloseBracket");
+                    var arrEnd = sizeExpr?.Span.End ?? CurrentSpan().End;
+                    children.Add(new AstChild
+                    {
+                        Role = "array",
+                        Node = new AstNode
+                        {
+                            Id = NextId(),
+                            Kind = "ArrayDeclarator",
+                            Span = new Span { Start = arrStart, End = arrEnd },
+                            Children = sizeExpr is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "size", Node = sizeExpr } }
+                        }
+                    });
+                }
 
                 children.AddRange(ParseAnnotations(new[] { "Comma", "CloseParen" }));
 
@@ -662,7 +826,7 @@ public sealed class Parser
                 {
                     Id = NextId(),
                     Kind = "Parameter",
-                    Span = new Span { Start = typeTok.Span.Start, End = children.Last().Node.Span.End },
+                    Span = new Span { Start = paramStart, End = children.Last().Node.Span.End },
                     Children = children.ToArray()
                 });
             }
@@ -682,7 +846,14 @@ public sealed class Parser
                 break;
             }
         }
-        ConsumeExpected("CloseParen");
+        if (Match("CloseParen"))
+        {
+            Consume();
+        }
+        else
+        {
+            AddDiagnostic("HLSL1002", "Expected ')' to close parameter list.", CurrentSpan());
+        }
         return parameters.ToArray();
     }
 
@@ -987,6 +1158,22 @@ public sealed class Parser
         var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
         var children = new List<AstChild> { new AstChild { Role = "identifier", Node = Leaf("Identifier", name) } };
 
+        while (Match("Less"))
+        {
+            var annSpan = ConsumeAngleBlockSpan();
+            children.Add(new AstChild
+            {
+                Role = "annotation",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "Annotation",
+                    Span = annSpan,
+                    Children = Array.Empty<AstChild>()
+                }
+            });
+        }
+
         if (!Match("OpenBrace"))
         {
             AddDiagnostic("HLSL1002", "Expected '{' to start technique body.", CurrentSpan());
@@ -1040,6 +1227,22 @@ public sealed class Parser
         var name = Match("Identifier") ? Consume() : new Token { Span = CurrentSpan() };
         var children = new List<AstChild> { new AstChild { Role = "identifier", Node = Leaf("Identifier", name) } };
 
+        while (Match("Less"))
+        {
+            var annSpan = ConsumeAngleBlockSpan();
+            children.Add(new AstChild
+            {
+                Role = "annotation",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "Annotation",
+                    Span = annSpan,
+                    Children = Array.Empty<AstChild>()
+                }
+            });
+        }
+
         AstNode body;
         if (Match("OpenBrace"))
         {
@@ -1085,6 +1288,28 @@ public sealed class Parser
             end = CurrentSpan().End;
             Consume();
         }
+        return new Span { Start = startTok.Span.Start, End = end };
+    }
+
+    private Span ConsumeAngleBlockSpan()
+    {
+        var startTok = ConsumeExpected("Less");
+        var depth = 1;
+        var end = startTok.Span.End;
+        while (!IsEnd && depth > 0)
+        {
+            if (Match("Less"))
+            {
+                depth++;
+            }
+            else if (Match("Greater"))
+            {
+                depth--;
+            }
+            end = CurrentSpan().End;
+            Consume();
+        }
+
         return new Span { Start = startTok.Span.Start, End = end };
     }
 
@@ -1154,7 +1379,7 @@ public sealed class Parser
             var opPrec = GetPrecedence(op.Kind);
             if (opPrec < precedence) break;
 
-            var associativity = op.Kind == "Equals" ? Precedence.Right : Precedence.Left;
+            var associativity = IsAssignmentOperator(op.Kind) ? Precedence.Right : Precedence.Left;
             Consume();
             var right = ParseExpression(opPrec + (associativity == Precedence.Left ? 1 : 0));
             if (right is null)
@@ -1184,7 +1409,7 @@ public sealed class Parser
     {
         if (IsEnd) return null;
         var tok = Current!;
-        if (tok.Kind is "Plus" or "Minus" or "Bang" or "Tilde")
+        if (tok.Kind is "Plus" or "Minus" or "Bang" or "Tilde" or "PlusPlus" or "MinusMinus")
         {
             Consume();
             var operand = ParseUnary();
@@ -1200,11 +1425,11 @@ public sealed class Parser
                 Kind = "UnaryExpression",
                 Span = new Span { Start = tok.Span.Start, End = operand.Span.End },
                 Children = new[]
-                {
-                    new AstChild { Role = "operator", Node = Leaf("Operator", tok) },
-                    new AstChild { Role = "operand", Node = operand }
-                }
-            };
+            {
+                new AstChild { Role = "operator", Node = Leaf("Operator", tok) },
+                new AstChild { Role = "operand", Node = operand }
+            }
+        };
         }
 
         return ParsePostfix();
@@ -1298,6 +1523,23 @@ public sealed class Parser
                 continue;
             }
 
+            if (Match("PlusPlus") || Match("MinusMinus"))
+            {
+                var op = Consume();
+                primary = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "PostfixExpression",
+                    Span = new Span { Start = primary.Span.Start, End = op.Span.End },
+                    Children = new[]
+                    {
+                        new AstChild { Role = "expression", Node = primary },
+                        new AstChild { Role = "operator", Node = Leaf("Operator", op) }
+                    }
+                };
+                continue;
+            }
+
             break;
         }
 
@@ -1310,6 +1552,8 @@ public sealed class Parser
         var tok = Current!;
         switch (tok.Kind)
         {
+            case "Identifier" when string.Equals(tok.Text, "compile", StringComparison.OrdinalIgnoreCase):
+                return ParseCompileExpression();
             case "Identifier":
             case var k when k.StartsWith("Keyword", StringComparison.Ordinal):
                 Consume();
@@ -1317,6 +1561,17 @@ public sealed class Parser
             case "NumericLiteral":
                 Consume();
                 return Leaf("Literal", tok);
+            case "Less":
+                var angleSpan = ConsumeAngleBlockSpan();
+                return new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "AngleExpression",
+                    Span = angleSpan,
+                    Children = Array.Empty<AstChild>()
+                };
+            case "OpenParen" when LooksLikeCast():
+                return ParseCastExpression();
             case "OpenParen":
                 Consume();
                 var expr = ParseExpression();
@@ -1340,6 +1595,15 @@ public sealed class Parser
 
     private bool IsModifier(Token token) =>
         token.Kind is "KeywordStatic" or "KeywordConst" or "KeywordUniform" or "KeywordExtern" or "KeywordVolatile";
+
+    private bool IsParameterModifier(Token token) =>
+        IsModifier(token) ||
+        (token.Kind == "Identifier" && (string.Equals(token.Text, "in", StringComparison.OrdinalIgnoreCase)
+                                        || string.Equals(token.Text, "out", StringComparison.OrdinalIgnoreCase)
+                                        || string.Equals(token.Text, "inout", StringComparison.OrdinalIgnoreCase)));
+
+    private bool IsAssignmentOperator(string kind) =>
+        kind is "Equals" or "PlusEquals" or "MinusEquals" or "StarEquals" or "SlashEquals" or "PercentEquals" or "AmpersandEquals" or "PipeEquals" or "CaretEquals" or "LessLessEquals" or "GreaterGreaterEquals";
 
     private int SkipModifiersFrom(int index)
     {
@@ -1402,6 +1666,13 @@ public sealed class Parser
         }
 
         return PeekAbsolute(index + lookahead + 1)?.Kind == "OpenParen";
+    }
+
+    private bool LooksLikeCast()
+    {
+        var next = Peek(1);
+        var nextNext = Peek(2);
+        return next is not null && IsTypeLike(next) && nextNext?.Kind == "CloseParen";
     }
 
     private Token Consume()
@@ -1474,7 +1745,7 @@ public sealed class Parser
 
     private static int GetPrecedence(string kind) => kind switch
     {
-        "Equals" => 1,
+        "Equals" or "PlusEquals" or "MinusEquals" or "StarEquals" or "SlashEquals" or "PercentEquals" or "AmpersandEquals" or "PipeEquals" or "CaretEquals" or "LessLessEquals" or "GreaterGreaterEquals" => 1,
         "PipePipe" => 2,
         "AmpersandAmpersand" => 3,
         "Pipe" => 4,

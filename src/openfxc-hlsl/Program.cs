@@ -46,7 +46,7 @@ internal sealed class Program
 
             var preOptions = new PreprocessorOptions
             {
-                FilePath = options.InputPath,
+                FilePath = fileName,
                 IncludeDirectories = includeDirs,
                 Defines = defineMap
             };
@@ -55,12 +55,13 @@ internal sealed class Program
             var length = preprocessed.Text.Length;
 
             var (tokens, lexDiagnostics) = HlslLexer.Lex(preprocessed.Text);
-            var combinedLexDiagnostics = preprocessed.Diagnostics.Concat(lexDiagnostics).ToArray();
+            var preprocessorDiagnostics = preprocessed.Diagnostics.ToArray();
+            var combinedLexDiagnostics = preprocessorDiagnostics.Concat(lexDiagnostics).ToArray();
 
             string json = command switch
             {
                 "lex" => Serialize(new LexResult(FormatVersion, new SourceInfo(fileName, length), tokens, combinedLexDiagnostics)),
-                "parse" => Serialize(BuildParseResult(fileName, length, tokens, combinedLexDiagnostics)),
+                "parse" => Serialize(BuildParseResult(fileName, length, tokens, lexDiagnostics, preprocessorDiagnostics)),
                 _ => throw new InvalidOperationException($"Unknown command '{command}'. Expected 'lex' or 'parse'.")
             };
 
@@ -187,10 +188,10 @@ internal sealed class Program
         return JsonSerializer.Serialize(value, options);
     }
 
-    private static ParseResult BuildParseResult(string fileName, int length, Token[] tokens, Diagnostic[] lexDiagnostics)
+    private static ParseResult BuildParseResult(string fileName, int length, Token[] tokens, Diagnostic[] lexDiagnostics, Diagnostic[] preprocessorDiagnostics)
     {
         var (root, parseDiagnostics) = Parser.Parse(tokens, length);
-        var allDiagnostics = lexDiagnostics.Concat(parseDiagnostics).ToArray();
+        var allDiagnostics = lexDiagnostics.Concat(parseDiagnostics).Concat(preprocessorDiagnostics).ToArray();
 
         return new ParseResult(
             FormatVersion,

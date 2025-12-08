@@ -57,16 +57,22 @@ public class ParserSnapshotTests
         var actualNode = JsonNode.Parse(JsonSerializer.Serialize(result, SerializerOptions))!;
         var expectedNode = JsonNode.Parse(expectedJson)!;
 
-        Assert.True(JsonNode.DeepEquals(actualNode, expectedNode), $"Snapshot mismatch for {fixtureRelativePath}");
+        if (!JsonNode.DeepEquals(actualNode, expectedNode))
+        {
+            var actualPath = Path.ChangeExtension(snapshotPath, ".actual.json");
+            File.WriteAllText(actualPath, JsonSerializer.Serialize(result, SerializerOptions));
+            Assert.True(JsonNode.DeepEquals(actualNode, expectedNode), $"Snapshot mismatch for {fixtureRelativePath} (actual written to {actualPath})");
+        }
     }
 
     private static ParseResult BuildParseResult(string fixturePath)
     {
-        var text = File.ReadAllText(fixturePath);
+        var fullPath = Path.GetFullPath(fixturePath);
+        var text = File.ReadAllText(fullPath);
         var pre = Preprocessor.Preprocess(text, new PreprocessorOptions
         {
-            FilePath = fixturePath,
-            IncludeDirectories = new[] { Path.GetDirectoryName(fixturePath) ?? string.Empty }
+            FilePath = fullPath,
+            IncludeDirectories = new[] { Path.GetDirectoryName(fullPath) ?? string.Empty }
         });
 
         var (tokens, lexDiagnostics) = HlslLexer.Lex(pre.Text);
@@ -75,7 +81,7 @@ public class ParserSnapshotTests
 
         return new ParseResult(
             FormatVersion,
-            new SourceInfo(fixturePath, pre.Text.Length),
+            new SourceInfo(fullPath, pre.Text.Length),
             root,
             tokens,
             allDiagnostics);
