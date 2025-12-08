@@ -899,7 +899,10 @@ public sealed class Parser
         AstNode? init = null;
         if (!Match("Semicolon"))
         {
-            if (IsTypeLike(Current!) && Peek(1) is { Kind: "Identifier" } && Peek(2)?.Kind != "OpenParen")
+            var typeIndex = SkipModifiersFrom(_position);
+            var typeTok = PeekAbsolute(typeIndex);
+            var identAfterType = PeekAbsolute(typeIndex + 1);
+            if (typeTok is not null && IsTypeLike(typeTok) && identAfterType is { Kind: "Identifier" } && PeekAbsolute(typeIndex + 2)?.Kind != "OpenParen")
             {
                 init = ParseVariableDeclaration();
             }
@@ -1953,7 +1956,11 @@ public sealed class Parser
     private bool IsModifier(Token token) =>
         token.Kind is "KeywordStatic" or "KeywordConst" or "KeywordUniform" or "KeywordExtern" or "KeywordVolatile" ||
         (token.Kind == "Identifier" && (string.Equals(token.Text, "row_major", StringComparison.OrdinalIgnoreCase) ||
-                                        string.Equals(token.Text, "column_major", StringComparison.OrdinalIgnoreCase)));
+                                        string.Equals(token.Text, "column_major", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(token.Text, "unsigned", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(token.Text, "signed", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(token.Text, "long", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(token.Text, "short", StringComparison.OrdinalIgnoreCase)));
 
     private bool IsParameterModifier(Token token) =>
         IsModifier(token) ||
