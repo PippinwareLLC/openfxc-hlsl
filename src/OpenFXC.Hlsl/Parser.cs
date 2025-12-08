@@ -1680,6 +1680,9 @@ public sealed class Parser
             case "NumericLiteral":
                 Consume();
                 return Leaf("Literal", tok);
+            case "StringLiteral":
+                Consume();
+                return Leaf("StringLiteral", tok);
             case "Less":
                 var angleSpan = ConsumeAngleBlockSpan();
                 return new AstNode
@@ -1818,7 +1821,7 @@ public sealed class Parser
             return false;
         }
 
-        var startsExpression = after.Kind is "Identifier" or "NumericLiteral" or "OpenParen" or "Plus" or "Minus" ||
+        var startsExpression = after.Kind is "Identifier" or "NumericLiteral" or "StringLiteral" or "OpenParen" or "Plus" or "Minus" or "Less" ||
                                after.Kind.StartsWith("Keyword", StringComparison.Ordinal);
 
         return startsExpression;
