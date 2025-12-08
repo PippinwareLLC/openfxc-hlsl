@@ -657,6 +657,11 @@ public sealed class Parser
             return ParseWhileStatement();
         }
 
+        if (Current!.Kind == "KeywordSwitch")
+        {
+            return ParseSwitchStatement();
+        }
+
         if (Current!.Kind == "KeywordDo")
         {
             return ParseDoWhileStatement();
@@ -796,6 +801,93 @@ public sealed class Parser
                 new AstChild { Role = "body", Node = body },
                 new AstChild { Role = "condition", Node = condition ?? Leaf("Missing", new Token { Span = CurrentSpan() }) }
             }
+        };
+    }
+
+    private AstNode ParseSwitchStatement()
+    {
+        var start = Consume().Span.Start; // switch
+        ConsumeExpected("OpenParen");
+        var expr = ParseExpression();
+        ConsumeExpected("CloseParen");
+        ConsumeExpected("OpenBrace");
+
+        var sections = new List<AstChild>();
+        while (!IsEnd && !Match("CloseBrace"))
+        {
+            var labels = new List<AstChild>();
+            while (Match("KeywordCase") || Match("KeywordDefault"))
+            {
+                var labelStart = Consume().Span.Start;
+                AstNode labelNode;
+                if (Match("KeywordDefault"))
+                {
+                    // already consumed default
+                    ConsumeExpected("Colon");
+                    labelNode = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "DefaultLabel",
+                        Span = new Span { Start = labelStart, End = CurrentSpan().End },
+                        Children = Array.Empty<AstChild>()
+                    };
+                }
+                else
+                {
+                    // case
+                    var value = ParseExpression();
+                    ConsumeExpected("Colon");
+                    labelNode = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "CaseLabel",
+                        Span = new Span { Start = labelStart, End = value?.Span.End ?? CurrentSpan().End },
+                        Children = value is null ? Array.Empty<AstChild>() : new[] { new AstChild { Role = "value", Node = value } }
+                    };
+                }
+
+                labels.Add(new AstChild { Role = "label", Node = labelNode });
+            }
+
+            var statements = new List<AstChild>();
+            while (!IsEnd && !Match("CloseBrace") && !Match("KeywordCase") && !Match("KeywordDefault"))
+            {
+                var stmt = ParseStatement();
+                if (stmt is not null)
+                {
+                    statements.Add(new AstChild { Role = "statement", Node = stmt });
+                }
+                else
+                {
+                    // recovery: skip token
+                    Consume();
+                }
+            }
+
+            var secEnd = statements.LastOrDefault()?.Node.Span.End ?? labels.LastOrDefault()?.Node.Span.End ?? CurrentSpan().End;
+            sections.Add(new AstChild
+            {
+                Role = "section",
+                Node = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "SwitchSection",
+                    Span = new Span { Start = labels.FirstOrDefault()?.Node.Span.Start ?? CurrentSpan().Start, End = secEnd },
+                    Children = labels.Concat(statements).ToArray()
+                }
+            });
+        }
+
+        var end = Match("CloseBrace") ? Consume().Span.End : CurrentSpan().End;
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "SwitchStatement",
+            Span = new Span { Start = start, End = end },
+            Children = new[]
+            {
+                new AstChild { Role = "expression", Node = expr ?? Leaf("Missing", new Token { Span = CurrentSpan() }) }
+            }.Concat(sections).ToArray()
         };
     }
 
