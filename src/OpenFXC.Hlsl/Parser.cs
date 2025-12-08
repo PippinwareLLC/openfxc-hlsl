@@ -105,7 +105,13 @@ public sealed class Parser
                 {
                     var nextIndex = typeIndex + 1;
                     var nextToken = PeekAbsolute(nextIndex);
-                    if (nextToken is { Kind: "Identifier" } || nextToken is { Kind: "Less" })
+                    var nextIsIdentifierLike =
+                        nextToken is { Kind: "Identifier" } ||
+                        nextToken is { Kind: "Less" } ||
+                        (nextToken?.Kind.StartsWith("Keyword", StringComparison.Ordinal) == true &&
+                         !string.Equals(nextToken.Text, nextToken.Text.ToLowerInvariant(), StringComparison.Ordinal));
+
+                    if (nextIsIdentifierLike)
                     {
                         decl = ParseVariableDeclaration();
                     }
@@ -259,9 +265,22 @@ public sealed class Parser
                 ConsumeTemplateArguments();
             }
 
-            if (Match("Identifier"))
+            if (Current is not null && (Current.Kind == "Identifier" ||
+                                        (Current.Kind.StartsWith("Keyword", StringComparison.Ordinal) &&
+                                         !string.Equals(Current.Text, Current.Text.ToLowerInvariant(), StringComparison.Ordinal))))
             {
                 identTok = Consume();
+                if (!string.Equals(identTok.Kind, "Identifier", StringComparison.Ordinal))
+                {
+                    identTok = new Token
+                    {
+                        Kind = "Identifier",
+                        Text = identTok.Text,
+                        Span = identTok.Span,
+                        LeadingTrivia = identTok.LeadingTrivia,
+                        TrailingTrivia = identTok.TrailingTrivia
+                    };
+                }
             }
             else
             {
@@ -2026,7 +2045,8 @@ public sealed class Parser
                                         string.Equals(token.Text, "unsigned", StringComparison.OrdinalIgnoreCase) ||
                                         string.Equals(token.Text, "signed", StringComparison.OrdinalIgnoreCase) ||
                                         string.Equals(token.Text, "long", StringComparison.OrdinalIgnoreCase) ||
-                                        string.Equals(token.Text, "short", StringComparison.OrdinalIgnoreCase)));
+                                        string.Equals(token.Text, "short", StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(token.Text, "shared", StringComparison.OrdinalIgnoreCase)));
 
     private bool IsParameterModifier(Token token) =>
         IsModifier(token) ||
