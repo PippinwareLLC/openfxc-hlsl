@@ -46,7 +46,9 @@ public static class Preprocessor
         {
             ".hlsl",
             ".fx",
-            ".fxh"
+            ".fxh",
+            ".hlsli",
+            ".h"
         };
         private readonly Dictionary<string, MacroDefinition> _macros = new(StringComparer.Ordinal);
         private readonly HashSet<string> _includeStack = new(StringComparer.OrdinalIgnoreCase);
@@ -330,7 +332,14 @@ public static class Preprocessor
             var includeText = File.ReadAllText(resolved);
 
             var extension = Path.GetExtension(resolved);
-            if (!string.IsNullOrEmpty(extension) && !HlslExtensions.Contains(extension))
+            var shouldTreatAsHlsl = !string.IsNullOrEmpty(extension) && HlslExtensions.Contains(extension);
+            if (shouldTreatAsHlsl && string.Equals(extension, ".h", StringComparison.OrdinalIgnoreCase))
+            {
+                // Some DXSDK samples ship HLSL modules as .h; fall back to opaque if they look like C/C++.
+                shouldTreatAsHlsl = !LooksLikeNativeHeader(includeText);
+            }
+
+            if (!shouldTreatAsHlsl)
             {
                 var sanitized = SanitizeOpaqueInclude(includeText);
                 AddSegment(resolved, 0, includeText.Length, output.Length, sanitized.Length);
@@ -387,6 +396,23 @@ public static class Preprocessor
             }
 
             return builder.ToString();
+        }
+
+        private static bool LooksLikeNativeHeader(string text)
+        {
+            // Heuristic: native headers in DXSDK samples often contain namespace qualifiers or templated includes.
+            // If we see scope resolution, angle include directives, or obvious C++ keywords, treat as non-HLSL.
+            if (text.IndexOf("::", StringComparison.Ordinal) >= 0)
+            {
+                return true;
+            }
+
+            if (text.Contains("#include <", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static string? ParseIncludePath(ReadOnlySpan<char> rest, out bool isAngle)

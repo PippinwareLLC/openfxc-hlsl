@@ -73,7 +73,7 @@ public class PreprocessorTests
     {
         var repoRoot = TestPaths.FindRepoRoot();
         var includeDir = Path.Combine(repoRoot, "tests", "fixtures");
-        var text = "#include \"opaque_header.h\"\nfloat4 main() : SV_Target { return 1; }";
+        var text = "#include \"opaque_header.hpp\"\nfloat4 main() : SV_Target { return 1; }";
 
         var result = Preprocessor.Preprocess(
             text,

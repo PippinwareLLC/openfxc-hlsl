@@ -1695,6 +1695,39 @@ public sealed class Parser
         {
             var op = Current;
             if (op is null) break;
+
+            if (op.Kind == "Question")
+            {
+                var condPrec = GetPrecedence(op.Kind);
+                if (condPrec < precedence) break;
+
+                Consume(); // ?
+                var whenTrue = ParseExpression();
+                ConsumeExpected("Colon");
+                var whenFalse = ParseExpression(condPrec + 1);
+
+                if (whenTrue is null || whenFalse is null)
+                {
+                    AddDiagnostic("HLSL1003", $"Expected expression after '{op.Text}'.", CurrentSpan());
+                    break;
+                }
+
+                left = new AstNode
+                {
+                    Id = NextId(),
+                    Kind = "ConditionalExpression",
+                    Span = new Span { Start = left.Span.Start, End = whenFalse.Span.End },
+                    Children = new[]
+                    {
+                        new AstChild { Role = "condition", Node = left },
+                        new AstChild { Role = "whenTrue", Node = whenTrue },
+                        new AstChild { Role = "whenFalse", Node = whenFalse }
+                    }
+                };
+
+                continue;
+            }
+
             var opPrec = GetPrecedence(op.Kind);
             if (opPrec < precedence) break;
 
@@ -2160,16 +2193,17 @@ public sealed class Parser
     private static int GetPrecedence(string kind) => kind switch
     {
         "Equals" or "PlusEquals" or "MinusEquals" or "StarEquals" or "SlashEquals" or "PercentEquals" or "AmpersandEquals" or "PipeEquals" or "CaretEquals" or "LessLessEquals" or "GreaterGreaterEquals" => 1,
-        "PipePipe" => 2,
-        "AmpersandAmpersand" => 3,
-        "Pipe" => 4,
-        "Caret" => 5,
-        "Ampersand" => 6,
-        "EqualsEquals" or "BangEquals" => 7,
-        "Less" or "LessEquals" or "Greater" or "GreaterEquals" => 8,
-        "LessLess" or "GreaterGreater" => 9,
-        "Plus" or "Minus" => 10,
-        "Star" or "Slash" or "Percent" => 11,
+        "Question" => 2,
+        "PipePipe" => 3,
+        "AmpersandAmpersand" => 4,
+        "Pipe" => 5,
+        "Caret" => 6,
+        "Ampersand" => 7,
+        "EqualsEquals" or "BangEquals" => 8,
+        "Less" or "LessEquals" or "Greater" or "GreaterEquals" => 9,
+        "LessLess" or "GreaterGreater" => 10,
+        "Plus" or "Minus" => 11,
+        "Star" or "Slash" or "Percent" => 12,
         _ => -1
     };
 
