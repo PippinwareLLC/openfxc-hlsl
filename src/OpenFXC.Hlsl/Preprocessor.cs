@@ -42,6 +42,12 @@ public static class Preprocessor
 
     private sealed class PreprocessorContext
     {
+        private static readonly HashSet<string> HlslExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".hlsl",
+            ".fx",
+            ".fxh"
+        };
         private readonly Dictionary<string, MacroDefinition> _macros = new(StringComparer.Ordinal);
         private readonly HashSet<string> _includeStack = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _pragmaOnce = new(StringComparer.OrdinalIgnoreCase);
@@ -322,6 +328,17 @@ public static class Preprocessor
             }
 
             var includeText = File.ReadAllText(resolved);
+
+            var extension = Path.GetExtension(resolved);
+            if (!string.IsNullOrEmpty(extension) && !HlslExtensions.Contains(extension))
+            {
+                var sanitized = SanitizeOpaqueInclude(includeText);
+                AddSegment(resolved, 0, includeText.Length, output.Length, sanitized.Length);
+                output.Append(sanitized);
+                output.Append(newline);
+                return;
+            }
+
             ProcessFile(includeText, resolved, output);
             output.Append(newline);
         }
@@ -359,6 +376,17 @@ public static class Preprocessor
             }
 
             return null;
+        }
+
+        private static string SanitizeOpaqueInclude(string text)
+        {
+            var builder = new StringBuilder(text.Length);
+            foreach (var ch in text)
+            {
+                builder.Append(ch is '\r' or '\n' ? ch : ' ');
+            }
+
+            return builder.ToString();
         }
 
         private static string? ParseIncludePath(ReadOnlySpan<char> rest, out bool isAngle)

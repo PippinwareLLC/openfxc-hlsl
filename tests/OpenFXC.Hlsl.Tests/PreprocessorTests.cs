@@ -67,4 +67,27 @@ public class PreprocessorTests
         Assert.Contains("float value = 42;", result.Text);
         Assert.DoesNotContain("FOO", result.Text);
     }
+
+    [Fact]
+    public void TreatsNonHlslIncludesAsOpaque()
+    {
+        var repoRoot = TestPaths.FindRepoRoot();
+        var includeDir = Path.Combine(repoRoot, "tests", "fixtures");
+        var text = "#include \"opaque_header.h\"\nfloat4 main() : SV_Target { return 1; }";
+
+        var result = Preprocessor.Preprocess(
+            text,
+            new PreprocessorOptions
+            {
+                FilePath = Path.Combine(includeDir, "opaque_include.hlsl"),
+                IncludeDirectories = new[] { includeDir }
+            });
+
+        Assert.Empty(result.Diagnostics.Where(d => d.Id.StartsWith("HLSL20")));
+        Assert.DoesNotContain("OpaqueThing", result.Text, StringComparison.Ordinal);
+
+        // Ensure the include still contributes line breaks so span mapping stays aligned.
+        var newlineCount = result.Text.Count(c => c == '\n');
+        Assert.True(newlineCount >= 6);
+    }
 }
