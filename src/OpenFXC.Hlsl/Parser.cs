@@ -988,7 +988,7 @@ public sealed class Parser
 
             var start = colon.Span.Start;
             var tokens = new List<Token>();
-            while (!IsEnd && !termSet.Contains(Current!.Kind) && Current!.Kind != "Comma" && Current!.Kind != "Equals" && Current!.Kind != "OpenBrace")
+            while (!IsEnd && !termSet.Contains(Current!.Kind) && Current!.Kind != "Comma" && Current!.Kind != "Equals" && Current!.Kind != "OpenBrace" && Current!.Kind != "Less")
             {
                 tokens.Add(Consume());
             }
