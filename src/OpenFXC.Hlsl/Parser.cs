@@ -294,6 +294,22 @@ public sealed class Parser
                 declChildren.Add(annotation);
             }
 
+            while (Match("Less"))
+            {
+                var annSpan = ConsumeAngleBlockSpan();
+                declChildren.Add(new AstChild
+                {
+                    Role = "annotation",
+                    Node = new AstNode
+                    {
+                        Id = NextId(),
+                        Kind = "Annotation",
+                        Span = annSpan,
+                        Children = Array.Empty<AstChild>()
+                    }
+                });
+            }
+
             if (Match("Equals"))
             {
                 Consume(); // =
