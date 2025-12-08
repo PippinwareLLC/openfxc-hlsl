@@ -302,7 +302,7 @@ public sealed class Parser
                 {
                     initializer = ParseAsmBlock();
                 }
-                else if (typeTok.Kind == "KeywordSampler" && Match("KeywordSamplerState"))
+                else if (IsSamplerType(typeTok) && Match("KeywordSamplerState"))
                 {
                     initializer = ParseInlineSamplerState();
                 }
@@ -1672,6 +1672,10 @@ public sealed class Parser
 
     private bool IsTypeLike(Token token) =>
         token.Kind.StartsWith("Keyword", StringComparison.Ordinal) || token.Kind == "Identifier";
+
+    private bool IsSamplerType(Token token) =>
+        token.Kind.StartsWith("KeywordSampler", StringComparison.Ordinal)
+        && token.Kind is not "KeywordSamplerState" and not "KeywordSamplerState10";
 
     private bool IsModifier(Token token) =>
         token.Kind is "KeywordStatic" or "KeywordConst" or "KeywordUniform" or "KeywordExtern" or "KeywordVolatile" ||
