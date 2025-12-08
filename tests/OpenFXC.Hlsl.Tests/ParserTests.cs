@@ -157,4 +157,16 @@ public class ParserTests
         Assert.Empty(lexDiagnostics);
         Assert.Empty(parseDiagnostics);
     }
+
+    [Fact]
+    public void ParseCompileFragmentAndInitializerList()
+    {
+        var path = Path.Combine(RepoRoot, "tests", "fixtures", "parse-compile-fragment.fx");
+        var text = File.ReadAllText(path);
+        var (tokens, lexDiagnostics) = HlslLexer.Lex(text);
+        var (_, parseDiagnostics) = Parser.Parse(tokens, text.Length);
+
+        Assert.Empty(lexDiagnostics);
+        Assert.Empty(parseDiagnostics);
+    }
 }

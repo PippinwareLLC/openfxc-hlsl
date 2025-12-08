@@ -1944,7 +1944,8 @@ public sealed class Parser
         var tok = Current!;
         switch (tok.Kind)
         {
-            case "Identifier" when string.Equals(tok.Text, "compile", StringComparison.OrdinalIgnoreCase):
+            case "Identifier" when string.Equals(tok.Text, "compile", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(tok.Text, "compile_fragment", StringComparison.OrdinalIgnoreCase):
                 return ParseCompileExpression();
             case "Identifier":
             case var k when k.StartsWith("Keyword", StringComparison.Ordinal):
@@ -1965,11 +1966,44 @@ public sealed class Parser
                 var expr = ParseExpression();
                 ConsumeExpected("CloseParen");
                 return expr;
+            case "OpenBrace":
+                return ParseInitializerExpression();
             default:
                 AddDiagnostic("HLSL1001", $"Unexpected token '{tok.Text}'.", tok.Span);
                 Consume();
                 return null;
         }
+    }
+
+    private AstNode ParseInitializerExpression()
+    {
+        var start = ConsumeExpected("OpenBrace").Span.Start;
+        var elements = new List<AstChild>();
+        while (!IsEnd && !Match("CloseBrace"))
+        {
+            var element = ParseExpression();
+            if (element is not null)
+            {
+                elements.Add(new AstChild { Role = "element", Node = element });
+            }
+
+            if (Match("Comma"))
+            {
+                Consume();
+                continue;
+            }
+
+            break;
+        }
+
+        var end = ConsumeExpected("CloseBrace").Span.End;
+        return new AstNode
+        {
+            Id = NextId(),
+            Kind = "InitializerExpression",
+            Span = new Span { Start = start, End = end },
+            Children = elements.ToArray()
+        };
     }
 
     private enum Precedence
