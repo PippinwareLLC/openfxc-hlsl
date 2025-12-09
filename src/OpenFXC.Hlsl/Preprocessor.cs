@@ -48,7 +48,9 @@ public static class Preprocessor
             ".fx",
             ".fxh",
             ".hlsli",
-            ".h"
+            ".h",
+            ".vsh",
+            ".psh"
         };
         private readonly Dictionary<string, MacroDefinition> _macros = new(StringComparer.Ordinal);
         private readonly HashSet<string> _includeStack = new(StringComparer.OrdinalIgnoreCase);
